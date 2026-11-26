@@ -177,3 +177,4 @@ All shared constants are defined in `Shared/System_Types.h`:
 - **Brake Feedback**: A hobby servo command does not confirm physical mechanical friction engagement. Never rely on the brake servo alone to protect against falling loads during suspended testing; always install a physical safety block.
 - **Rope Failure Detection**: Not implemented in software because electrical/load-cell sensor criteria have not been validated. Documented as future research.
 - **Power Isolation**: The DC motor and servo must have an independent, isolated power supply sharing a single ground star-point with the logic supply.
+# Mini-elevator
