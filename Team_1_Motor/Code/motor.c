@@ -77,7 +77,7 @@ sbit MOTOR_PWM_Direction   at TRISC2_bit;
 #define SERVO_PERIOD_TICKS        12500 /* 20 ms  */
 
 /* Weight / HX711 (channel A, gain 128 -> 25 clock pulses per read) */
-#define HX711_COUNTS_PER_GRAM     1L    /* <<< PLACEHOLDER (integer). CALIBRATE!      */
+#define HX711_COUNTS_PER_GRAM     215L  /* Calibrated for 10kg TAL220 (1mV/V); recalibrate on hardware */
 #define HX711_INVERT              0     /* 1 = load cell wired so counts DEcrease with load */
 #define AUTO_TARE_ON_BOOT         1     /* 1 = tare at power-up (cabin must be EMPTY) */
 #define HX711_OFFSET_DEFAULT      0L    /* used only if boot-time tare fails          */
@@ -195,6 +195,7 @@ static signed long HX711_ReadRaw(void)
     }
     /* 25th pulse: selects channel A, gain 128 for the next conversion */
     HX711_SCK = 1;
+    Delay_us(1);
     HX711_SCK = 0;
 
     if (v & 0x00800000UL) v |= 0xFF000000UL;   /* sign-extend 24 -> 32 bit */

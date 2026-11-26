@@ -28,10 +28,13 @@ void Inputs_DisplayStatus(
 void Inputs_Buzzer(unsigned char event_code);
 #line 1 "c:/users/ahmed/desktop/college/project embeded/mini_elevator_compile/team_2_inputs/code/../keypad_config.h"
 #line 1 "c:/users/ahmed/desktop/college/project embeded/mini_elevator_compile/team_2_inputs/code/../../shared/system_types.h"
-#line 54 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
-static unsigned char req_last_code;
-static unsigned char req_stable_cnt;
-static unsigned char req_queue[ 4 ];
+#line 49 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
+static unsigned char kp_last_key;
+static unsigned char kp_stable_cnt;
+static unsigned char btn_last_mask;
+static unsigned char btn_stable_cnt;
+static unsigned char btn_stable_mask;
+static unsigned char req_queue[ 8 ];
 static unsigned char req_head;
 static unsigned char req_tail;
 static unsigned char req_count;
@@ -48,12 +51,10 @@ static unsigned char bz_tick_cnt;
 
 static char lcd_cache[2][17];
 static char lcd_line_buf[17];
-#line 78 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
+#line 76 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
 static void lcd_write_nibble(unsigned char nibble) {
-  PORTD.F4  = (nibble & 0x01) ? 1 : 0;
-  PORTD.F5  = (nibble & 0x02) ? 1 : 0;
-  PORTD.F6  = (nibble & 0x04) ? 1 : 0;
-  PORTD.F7  = (nibble & 0x08) ? 1 : 0;
+
+ PORTD = (unsigned char)((PORTD & 0x07) | ((nibble & 0x0F) << 4));
 
  Delay_us(1);
   PORTD.F3  = 1;
@@ -112,7 +113,7 @@ static void lcd_write_line(unsigned char row, char *ram_text) {
  lcd_send_byte((unsigned char)ram_text[i], 1);
  }
 }
-#line 146 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
+#line 142 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
 static unsigned char buf_put_const_str(char *buf, unsigned char pos, const char *s) {
  while (*s != 0 && pos < 16) {
  buf[pos++] = *s++;
@@ -121,23 +122,45 @@ static unsigned char buf_put_const_str(char *buf, unsigned char pos, const char 
 }
 
 static unsigned char buf_put_ulong(char *buf, unsigned char pos, unsigned long value) {
- char digits[6];
- unsigned char count = 0;
- unsigned char i;
+ unsigned char started = 0;
+ unsigned char d;
+ unsigned int v16;
 
- if (value > 99999UL) {
- value = 99999UL;
+ if (value > 65000UL) {
+ value = 65000UL;
+ }
+ v16 = (unsigned int)value;
+
+ d = 0;
+ while (v16 >= 10000u) { v16 -= 10000u; d++; }
+ if (d != 0) {
+ started = 1;
+ if (pos < 16) buf[pos++] = (char)('0' + d);
  }
 
- do {
- digits[count++] = (char)('0' + (unsigned char)(value % 10UL));
- value /= 10UL;
- } while (value != 0UL);
+ d = 0;
+ while (v16 >= 1000u) { v16 -= 1000u; d++; }
+ if (d != 0 || started) {
+ started = 1;
+ if (pos < 16) buf[pos++] = (char)('0' + d);
+ }
 
- for (i = count; i > 0; i--) {
+ d = 0;
+ while (v16 >= 100u) { v16 -= 100u; d++; }
+ if (d != 0 || started) {
+ started = 1;
+ if (pos < 16) buf[pos++] = (char)('0' + d);
+ }
+
+ d = 0;
+ while (v16 >= 10u) { v16 -= 10u; d++; }
+ if (d != 0 || started) {
+ started = 1;
+ if (pos < 16) buf[pos++] = (char)('0' + d);
+ }
+
  if (pos < 16) {
- buf[pos++] = digits[i - 1];
- }
+ buf[pos++] = (char)('0' + (unsigned char)v16);
  }
  return pos;
 }
@@ -186,31 +209,35 @@ static void lcd_flush_if_changed(unsigned char row) {
  lcd_write_line(row, lcd_line_buf);
  }
 }
-#line 224 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
+#line 242 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
 static void keypad_rows_idle(void) {
+  PORTB.F3  = 1;
   PORTE.F0  = 1;
   PORTE.F1  = 1;
   PORTE.F2  = 1;
 }
-#line 237 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
+#line 257 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
 static unsigned char keypad_scan_raw(void) {
  unsigned char row;
  unsigned char key = 0;
 
- for (row = 0; row < 3 && key == 0; row++) {
+ for (row = 0; row < 4 && key == 0; row++) {
  keypad_rows_idle();
 
  if (row == 0) {
-  PORTE.F0  = 0;
+  PORTB.F3  = 0;
  }
  else if (row == 1) {
+  PORTE.F0  = 0;
+ }
+ else if (row == 2) {
   PORTE.F1  = 0;
  }
  else {
   PORTE.F2  = 0;
  }
 
- Delay_us(10);
+ Delay_us(20);
 
  if ( PORTB.F0  == 0) {
  key = (unsigned char)(row * 3 + 1);
@@ -226,70 +253,57 @@ static unsigned char keypad_scan_raw(void) {
  keypad_rows_idle();
  return key;
 }
-#line 275 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
-static unsigned char scan_all_inputs_raw(void) {
- unsigned char key;
 
- if ( PORTA.F2  == 0) return (unsigned char)( 1  +  0 );
- if ( PORTA.F3  == 0) return (unsigned char)( 1  +  1 );
- if ( PORTA.F4  == 0) return (unsigned char)( 1  +  2 );
- if ( PORTA.F5  == 0) return (unsigned char)( 1  +  3 );
 
- key = keypad_scan_raw();
- if (key != 0) {
- return (unsigned char)( 10  + key);
- }
+static unsigned char landing_buttons_read_raw_mask(void) {
+ unsigned char mask = 0;
 
- return  0 ;
+ if ( PORTA.F2  == 0) mask |= 0x01;
+ if ( PORTA.F3  == 0) mask |= 0x02;
+ if ( PORTA.F4  == 0) mask |= 0x04;
+ if ( PORTA.F5  == 0) mask |= 0x08;
+
+ return mask;
 }
 
 static void request_queue_push(unsigned char floor) {
  if (! ((floor) <= 3 ) ) {
  return;
  }
- if (req_count >=  4 ) {
+ if (req_count >=  8 ) {
  return;
  }
 
  req_queue[req_tail] = floor;
  req_tail++;
- if (req_tail >=  4 ) {
+ if (req_tail >=  8 ) {
  req_tail = 0;
  }
  req_count++;
 }
-
-
-static void handle_debounced_press(unsigned char scan_code) {
- unsigned char key;
-
- if (scan_code >=  1  &&
- scan_code < (unsigned char)( 1  +  4 )) {
- request_queue_push((unsigned char)(scan_code -  1 ));
- return;
- }
-
- if (scan_code >  10 ) {
- key = (unsigned char)(scan_code -  10 );
+#line 324 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
+static void handle_debounced_keypad(unsigned char key) {
  switch (key) {
- case 8:
+ case 11:
  request_queue_push( 0 );
  break;
  case 1:
+ case 4:
  request_queue_push( 1 );
  break;
  case 2:
+ case 5:
  request_queue_push( 2 );
  break;
  case 3:
+ case 6:
  request_queue_push( 3 );
  break;
  default:
  break;
  }
- }
 }
-#line 342 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
+#line 350 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
 static unsigned char hall_read_raw_mask(void) {
  unsigned char mask = 0;
 
@@ -300,7 +314,7 @@ static unsigned char hall_read_raw_mask(void) {
 
  return mask;
 }
-#line 357 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
+#line 365 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
 static void buzzer_service_tick(void) {
  unsigned char output_on = 0;
  unsigned char period = 0;
@@ -355,7 +369,7 @@ static void buzzer_service_tick(void) {
 
   PORTC.F7  = output_on;
 }
-#line 416 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
+#line 424 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
 void Inputs_Init(void) {
  unsigned char pos;
 
@@ -366,6 +380,7 @@ void Inputs_Init(void) {
  OPTION_REG.F7 = 0;
 
 
+  TRISB.F3  = 0;
   TRISE.F0  = 0;
   TRISE.F1  = 0;
   TRISE.F2  = 0;
@@ -391,8 +406,11 @@ void Inputs_Init(void) {
   PORTC.F7  = 0;
 
 
- req_last_code =  0 ;
- req_stable_cnt = 0;
+ kp_last_key = 0;
+ kp_stable_cnt = 0;
+ btn_stable_mask = landing_buttons_read_raw_mask();
+ btn_last_mask = btn_stable_mask;
+ btn_stable_cnt = 0;
  req_head = 0;
  req_tail = 0;
  req_count = 0;
@@ -406,8 +424,10 @@ void Inputs_Init(void) {
 
 
  lcd_hw_init();
- lcd_cache[0][0] = 0;
- lcd_cache[1][0] = 0;
+ for (pos = 0; pos < 17; pos++) {
+ lcd_cache[0][pos] = 0;
+ lcd_cache[1][pos] = 0;
+ }
 
  pos = buf_put_const_str(lcd_line_buf, 0, "  MINI ELEVATOR ");
  buf_pad_line(lcd_line_buf, pos);
@@ -419,19 +439,39 @@ void Inputs_Init(void) {
 }
 
 void Inputs_Update(void) {
- unsigned char raw_code;
+ unsigned char raw_key;
+ unsigned char raw_btn;
+ unsigned char pressed_edges;
  unsigned char raw_hall;
 
 
- raw_code = scan_all_inputs_raw();
- if (raw_code != req_last_code) {
- req_last_code = raw_code;
- req_stable_cnt = 0;
+ raw_key = keypad_scan_raw();
+ if (raw_key != kp_last_key) {
+ kp_last_key = raw_key;
+ kp_stable_cnt = 0;
  }
- else if (req_stable_cnt <  3 ) {
- req_stable_cnt++;
- if (req_stable_cnt ==  3  && raw_code !=  0 ) {
- handle_debounced_press(raw_code);
+ else if (kp_stable_cnt <  2 ) {
+ kp_stable_cnt++;
+ if (kp_stable_cnt ==  2  && raw_key != 0) {
+ handle_debounced_keypad(raw_key);
+ }
+ }
+
+
+ raw_btn = landing_buttons_read_raw_mask();
+ if (raw_btn != btn_last_mask) {
+ btn_last_mask = raw_btn;
+ btn_stable_cnt = 0;
+ }
+ else if (btn_stable_cnt <  2 ) {
+ btn_stable_cnt++;
+ if (btn_stable_cnt ==  2 ) {
+ pressed_edges = (unsigned char)(raw_btn & (unsigned char)(~btn_stable_mask));
+ btn_stable_mask = raw_btn;
+ if (pressed_edges & 0x01) request_queue_push( 0 );
+ if (pressed_edges & 0x02) request_queue_push( 1 );
+ if (pressed_edges & 0x04) request_queue_push( 2 );
+ if (pressed_edges & 0x08) request_queue_push( 3 );
  }
  }
 
@@ -459,7 +499,7 @@ unsigned char Inputs_GetNewFloorRequest(unsigned char *floor) {
 
  *floor = req_queue[req_head];
  req_head++;
- if (req_head >=  4 ) {
+ if (req_head >=  8 ) {
  req_head = 0;
  }
  req_count--;

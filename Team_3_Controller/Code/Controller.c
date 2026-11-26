@@ -27,6 +27,7 @@
  */
 static unsigned char controller_state = STATE_WAIT_FOR_FLOOR;
 static unsigned char current_floor    = NO_FLOOR;
+static unsigned char last_known_floor = NO_FLOOR;
 static unsigned char target_floor     = NO_FLOOR;
 static signed char   direction        = DIR_STOP;
 static signed char   last_direction   = DIR_STOP;
@@ -50,7 +51,7 @@ static void Controller_EnterState(unsigned char new_state) {
 static void Controller_ReadRequests(void) {
     unsigned char requested_floor = NO_FLOOR;
 
-    if (Inputs_GetNewFloorRequest(&requested_floor) != 0) {
+    while (Inputs_GetNewFloorRequest(&requested_floor) != 0) {
         if (IS_VALID_FLOOR(requested_floor)) {
             RequestHandler_Add(requested_floor);
         }
@@ -62,6 +63,9 @@ static void Controller_ReadRequests(void) {
  */
 static void Controller_UpdateCurrentFloor(void) {
     current_floor = Inputs_GetCurrentFloor();
+    if (IS_VALID_FLOOR(current_floor)) {
+        last_known_floor = current_floor;
+    }
 }
 
 /*
@@ -72,6 +76,7 @@ static void Controller_UpdateCurrentFloor(void) {
 void Controller_Init(void) {
     controller_state = STATE_WAIT_FOR_FLOOR;
     current_floor    = NO_FLOOR;
+    last_known_floor = NO_FLOOR;
     target_floor     = NO_FLOOR;
     direction        = DIR_STOP;
     last_direction   = DIR_STOP;
@@ -95,6 +100,10 @@ void Controller_Init(void) {
  * Evaluates inputs, advances timers, executes FSM, and updates display.
  */
 void Controller_Update(void) {
+    unsigned char optimal;
+    unsigned char ref_floor;
+    unsigned char display_target;
+
     /* 1. Ingest inputs from Team 2 */
     Controller_ReadRequests();
     Controller_UpdateCurrentFloor();
@@ -177,31 +186,41 @@ void Controller_Update(void) {
 
             /* Service next queued request if present */
             if (RequestHandler_HasRequests() != 0) {
-                target_floor = RequestHandler_GetNextOptimal(current_floor, last_direction);
+                ref_floor = (current_floor != NO_FLOOR) ? current_floor : last_known_floor;
+                target_floor = RequestHandler_GetNextOptimal(ref_floor, last_direction);
 
                 if (target_floor == NO_FLOOR) {
                     break;
                 }
 
                 /* Scenario: Requested floor is the floor where cabin is already parked */
-                if (target_floor == current_floor) {
+                if (current_floor != NO_FLOOR && target_floor == current_floor) {
                     RequestHandler_Remove(target_floor);
                     Inputs_Buzzer(BUZZER_ARRIVAL);
                     target_floor = NO_FLOOR;
                     direction = DIR_STOP;
-                    last_direction = DIR_STOP;
+                    if (RequestHandler_HasRequests() == 0) {
+                        last_direction = DIR_STOP;
+                    }
                 }
-                /* Scenario: Target is above current floor */
-                else if (target_floor > current_floor) {
+                /* Scenario: Target is above reference floor */
+                else if (ref_floor != NO_FLOOR && target_floor > ref_floor) {
                     direction = DIR_UP;
                     last_direction = DIR_UP;
                     Brake_Release();
                     Controller_EnterState(STATE_BRAKE_RELEASE);
                 }
-                /* Scenario: Target is below current floor */
-                else if (target_floor < current_floor) {
+                /* Scenario: Target is below reference floor */
+                else if (ref_floor != NO_FLOOR && target_floor < ref_floor) {
                     direction = DIR_DOWN;
                     last_direction = DIR_DOWN;
+                    Brake_Release();
+                    Controller_EnterState(STATE_BRAKE_RELEASE);
+                }
+                /* Scenario: Mid-flight recovery (current_floor == NO_FLOOR) returning to last_known_floor */
+                else if (current_floor == NO_FLOOR && ref_floor != NO_FLOOR && target_floor == ref_floor) {
+                    direction = (last_direction == DIR_UP) ? DIR_DOWN : DIR_UP;
+                    last_direction = direction;
                     Brake_Release();
                     Controller_EnterState(STATE_BRAKE_RELEASE);
                 }
@@ -218,8 +237,18 @@ void Controller_Update(void) {
         case STATE_BRAKE_RELEASE:
             /* If a closer floor along the path of travel was requested while releasing brake, optimize target */
             if (current_floor != NO_FLOOR && direction != DIR_STOP) {
-                unsigned char optimal = RequestHandler_GetNextOptimal(current_floor, direction);
-                if (optimal != NO_FLOOR) {
+                optimal = RequestHandler_GetNextOptimal(current_floor, direction);
+                if (optimal == current_floor) {
+                    /* Current floor was requested before motor started: service immediately without moving */
+                    RequestHandler_Remove(current_floor);
+                    Inputs_Buzzer(BUZZER_ARRIVAL);
+                    Brake_Engage();
+                    target_floor = NO_FLOOR;
+                    direction = DIR_STOP;
+                    Controller_EnterState(STATE_IDLE);
+                    break;
+                }
+                else if (optimal != NO_FLOOR) {
                     target_floor = optimal;
                 }
             }
@@ -250,6 +279,14 @@ void Controller_Update(void) {
         case STATE_MOVING_UP:
             Motor_Set(DIR_UP, MOTOR_SPEED_PERCENT);
 
+            /* Dynamically update target_floor (and LCD) if a closer floor ahead is requested in flight */
+            if (last_known_floor != NO_FLOOR && target_floor != NO_FLOOR) {
+                optimal = RequestHandler_GetNextOptimal(last_known_floor, DIR_UP);
+                if (optimal != NO_FLOOR && optimal > last_known_floor && optimal < target_floor) {
+                    target_floor = optimal;
+                }
+            }
+
             if (travel_ticks < 65535u) {
                 travel_ticks++;
             }
@@ -278,6 +315,14 @@ void Controller_Update(void) {
          * -------------------------------------------------------------------- */
         case STATE_MOVING_DOWN:
             Motor_Set(DIR_DOWN, MOTOR_SPEED_PERCENT);
+
+            /* Dynamically update target_floor (and LCD) if a closer floor ahead is requested in flight */
+            if (last_known_floor != NO_FLOOR && target_floor != NO_FLOOR) {
+                optimal = RequestHandler_GetNextOptimal(last_known_floor, DIR_DOWN);
+                if (optimal != NO_FLOOR && optimal < last_known_floor && optimal > target_floor) {
+                    target_floor = optimal;
+                }
+            }
 
             if (travel_ticks < 65535u) {
                 travel_ticks++;
@@ -373,9 +418,14 @@ void Controller_Update(void) {
             break;
     }
 
-    /* 5. Synchronize 16x2 LCD status display */
+    /* 5. Synchronize 16x2 LCD status display (show queued call even while waiting/overloaded) */
+    ref_floor = (current_floor != NO_FLOOR) ? current_floor : last_known_floor;
+    display_target = (target_floor != NO_FLOOR)
+        ? target_floor
+        : RequestHandler_GetNextOptimal(ref_floor, last_direction);
+
     Inputs_DisplayStatus(current_floor,
-                         target_floor,
+                         display_target,
                          controller_state,
                          Weight_GetGrams());
 }

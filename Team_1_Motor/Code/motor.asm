@@ -281,6 +281,11 @@ L_motor_HX711_ReadRaw21:
 	GOTO       L_motor_HX711_ReadRaw18
 L_motor_HX711_ReadRaw19:
 	BSF        RA1_bit+0, BitPos(RA1_bit+0)
+	NOP
+	NOP
+	NOP
+	NOP
+	NOP
 	BCF        RA1_bit+0, BitPos(RA1_bit+0)
 	BTFSS      motor_HX711_ReadRaw_v_L0+2, 7
 	GOTO       L_motor_HX711_ReadRaw22
@@ -540,13 +545,41 @@ L_motor_Weight_PushSample85:
 	CLRF       motor_weight_g+3
 	GOTO       L_motor_Weight_PushSample33
 L_motor_Weight_PushSample32:
+	MOVLW      107
+	MOVWF      R0+0
+	CLRF       R0+1
+	CLRF       R0+2
+	CLRF       R0+3
 	MOVF       motor_Weight_PushSample_diff_L0+0, 0
-	MOVWF      motor_weight_g+0
+	ADDWF      R0+0, 1
 	MOVF       motor_Weight_PushSample_diff_L0+1, 0
-	MOVWF      motor_weight_g+1
+	BTFSC      STATUS+0, 0
+	INCFSZ     motor_Weight_PushSample_diff_L0+1, 0
+	ADDWF      R0+1, 1
 	MOVF       motor_Weight_PushSample_diff_L0+2, 0
-	MOVWF      motor_weight_g+2
+	BTFSC      STATUS+0, 0
+	INCFSZ     motor_Weight_PushSample_diff_L0+2, 0
+	ADDWF      R0+2, 1
 	MOVF       motor_Weight_PushSample_diff_L0+3, 0
+	BTFSC      STATUS+0, 0
+	INCFSZ     motor_Weight_PushSample_diff_L0+3, 0
+	ADDWF      R0+3, 1
+	MOVLW      215
+	MOVWF      R4+0
+	MOVLW      0
+	MOVWF      R4+1
+	MOVLW      0
+	MOVWF      R4+2
+	MOVLW      0
+	MOVWF      R4+3
+	CALL       _Div_32x32_U+0
+	MOVF       R0+0, 0
+	MOVWF      motor_weight_g+0
+	MOVF       R0+1, 0
+	MOVWF      motor_weight_g+1
+	MOVF       R0+2, 0
+	MOVWF      motor_weight_g+2
+	MOVF       R0+3, 0
 	MOVWF      motor_weight_g+3
 L_motor_Weight_PushSample33:
 	MOVF       motor_weight_g+3, 0

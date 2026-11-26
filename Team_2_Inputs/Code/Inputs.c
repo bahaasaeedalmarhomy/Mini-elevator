@@ -30,9 +30,9 @@
  * TUNING CONSTANTS (1 tick = CONTROLLER_TICK_MS = 10 ms)
  * ----------------------------------------------------------------------------
  */
-#define INPUT_DEBOUNCE_TICKS        3   /* 30 ms debounce for keypad & buttons */
+#define INPUT_DEBOUNCE_TICKS        2   /* 20 ms debounce for keypad & buttons */
 #define HALL_DEBOUNCE_TICKS         2   /* 20 ms debounce for Hall sensors     */
-#define REQ_QUEUE_SIZE              4   /* Internal FIFO buffer for key events */
+#define REQ_QUEUE_SIZE              8   /* Internal FIFO buffer for key events */
 
 /* Buzzer timing constants (in 10 ms ticks) */
 #define BZ_ARRIVAL_TICKS            15  /* 150 ms single arrival chime         */
@@ -41,18 +41,16 @@
 #define BZ_OVERLOAD_PERIOD_TICKS    20  /* 200 ms period (100 ms ON / 100 OFF) */
 #define BZ_FAULT_PERIOD_TICKS       60  /* 600 ms alternating long-short cycle */
 
-/* Internal scan codes (0 = no key/button pressed) */
-#define SCAN_CODE_NONE              0
-#define SCAN_CODE_LANDING_BASE      1   /* 1..4  -> Landing Floor 0..3         */
-#define SCAN_CODE_KEYPAD_BASE       10  /* 11..19 -> Matrix position 1..9      */
-
 /* ----------------------------------------------------------------------------
  * INTERNAL MODULE STATE
  * ----------------------------------------------------------------------------
  */
-/* Keypad & landing button debouncer + FIFO queue */
-static unsigned char req_last_code;
-static unsigned char req_stable_cnt;
+/* Independent keypad & landing-button debouncers + shared FIFO queue */
+static unsigned char kp_last_key;
+static unsigned char kp_stable_cnt;
+static unsigned char btn_last_mask;
+static unsigned char btn_stable_cnt;
+static unsigned char btn_stable_mask;
 static unsigned char req_queue[REQ_QUEUE_SIZE];
 static unsigned char req_head;
 static unsigned char req_tail;
@@ -76,10 +74,8 @@ static char lcd_line_buf[17];
  * ============================================================================
  */
 static void lcd_write_nibble(unsigned char nibble) {
-    LCD_D4_PIN = (nibble & 0x01) ? 1 : 0;
-    LCD_D5_PIN = (nibble & 0x02) ? 1 : 0;
-    LCD_D6_PIN = (nibble & 0x04) ? 1 : 0;
-    LCD_D7_PIN = (nibble & 0x08) ? 1 : 0;
+    /* Update RD4..RD7 atomically while preserving RD0..RD1 (Motor) and RD2 (RS) */
+    PORTD = (unsigned char)((PORTD & 0x07) | ((nibble & 0x0F) << 4));
 
     Delay_us(1);
     LCD_EN_PIN = 1;
@@ -151,23 +147,45 @@ static unsigned char buf_put_const_str(char *buf, unsigned char pos, const char 
 }
 
 static unsigned char buf_put_ulong(char *buf, unsigned char pos, unsigned long value) {
-    char digits[6];
-    unsigned char count = 0;
-    unsigned char i;
+    unsigned char started = 0;
+    unsigned char d;
+    unsigned int v16;
 
-    if (value > 99999UL) {
-        value = 99999UL;
+    if (value > 65000UL) {
+        value = 65000UL;
+    }
+    v16 = (unsigned int)value;
+
+    d = 0;
+    while (v16 >= 10000u) { v16 -= 10000u; d++; }
+    if (d != 0) {
+        started = 1;
+        if (pos < 16) buf[pos++] = (char)('0' + d);
     }
 
-    do {
-        digits[count++] = (char)('0' + (unsigned char)(value % 10UL));
-        value /= 10UL;
-    } while (value != 0UL);
+    d = 0;
+    while (v16 >= 1000u) { v16 -= 1000u; d++; }
+    if (d != 0 || started) {
+        started = 1;
+        if (pos < 16) buf[pos++] = (char)('0' + d);
+    }
 
-    for (i = count; i > 0; i--) {
-        if (pos < 16) {
-            buf[pos++] = digits[i - 1];
-        }
+    d = 0;
+    while (v16 >= 100u) { v16 -= 100u; d++; }
+    if (d != 0 || started) {
+        started = 1;
+        if (pos < 16) buf[pos++] = (char)('0' + d);
+    }
+
+    d = 0;
+    while (v16 >= 10u) { v16 -= 10u; d++; }
+    if (d != 0 || started) {
+        started = 1;
+        if (pos < 16) buf[pos++] = (char)('0' + d);
+    }
+
+    if (pos < 16) {
+        buf[pos++] = (char)('0' + (unsigned char)v16);
     }
     return pos;
 }
@@ -225,20 +243,22 @@ static void keypad_rows_idle(void) {
     KEYPAD_ROW1_PIN = 1;
     KEYPAD_ROW2_PIN = 1;
     KEYPAD_ROW3_PIN = 1;
+    KEYPAD_ROW4_PIN = 1;
 }
 
 /*
- * Scans the 3x3 matrix using active-LOW row drive and internal PORTB pull-ups.
- * Returns 0 if no key is pressed, otherwise key position 1..9:
- *   Row 1 (RE0): 1='1', 2='2', 3='3'
- *   Row 2 (RE1): 4='4', 5='5', 6='6'
- *   Row 3 (RE2): 7='*', 8='0', 9='#' (wired to Row 4 of 4x3 keypad per guide)
+ * Scans the 4x3 matrix (Team2tt.PDF) using active-LOW row drive and PORTB pull-ups.
+ * Returns 0 if no key is pressed, otherwise key position 1..12:
+ *   Row A (RB3):  1='1',  2='2',  3='3'
+ *   Row B (RE0):  4='4',  5='5',  6='6'
+ *   Row C (RE1):  7='7',  8='8',  9='9'
+ *   Row D (RE2): 10='*', 11='0', 12='#'
  */
 static unsigned char keypad_scan_raw(void) {
     unsigned char row;
     unsigned char key = 0;
 
-    for (row = 0; row < 3 && key == 0; row++) {
+    for (row = 0; row < 4 && key == 0; row++) {
         keypad_rows_idle();
 
         if (row == 0) {
@@ -247,11 +267,14 @@ static unsigned char keypad_scan_raw(void) {
         else if (row == 1) {
             KEYPAD_ROW2_PIN = 0;
         }
-        else {
+        else if (row == 2) {
             KEYPAD_ROW3_PIN = 0;
         }
+        else {
+            KEYPAD_ROW4_PIN = 0;
+        }
 
-        Delay_us(10);   /* Allow column pull-up capacitance to settle */
+        Delay_us(20);   /* Allow PORTB weak pull-up capacitance to settle */
 
         if (KEYPAD_COL1_PIN == 0) {
             key = (unsigned char)(row * 3 + 1);
@@ -268,24 +291,16 @@ static unsigned char keypad_scan_raw(void) {
     return key;
 }
 
-/*
- * Produces a unified raw input code. Landing buttons are checked first
- * (active LOW), followed by the internal cabin matrix keypad.
- */
-static unsigned char scan_all_inputs_raw(void) {
-    unsigned char key;
+/* Reads external landing call buttons (RA2..RA5, active LOW) as a 4-bit mask */
+static unsigned char landing_buttons_read_raw_mask(void) {
+    unsigned char mask = 0;
 
-    if (BTN_FLOOR_0_PIN == 0) return (unsigned char)(SCAN_CODE_LANDING_BASE + FLOOR_0);
-    if (BTN_FLOOR_1_PIN == 0) return (unsigned char)(SCAN_CODE_LANDING_BASE + FLOOR_1);
-    if (BTN_FLOOR_2_PIN == 0) return (unsigned char)(SCAN_CODE_LANDING_BASE + FLOOR_2);
-    if (BTN_FLOOR_3_PIN == 0) return (unsigned char)(SCAN_CODE_LANDING_BASE + FLOOR_3);
+    if (BTN_FLOOR_0_PIN == 0) mask |= 0x01;
+    if (BTN_FLOOR_1_PIN == 0) mask |= 0x02;
+    if (BTN_FLOOR_2_PIN == 0) mask |= 0x04;
+    if (BTN_FLOOR_3_PIN == 0) mask |= 0x08;
 
-    key = keypad_scan_raw();
-    if (key != 0) {
-        return (unsigned char)(SCAN_CODE_KEYPAD_BASE + key);
-    }
-
-    return SCAN_CODE_NONE;
+    return mask;
 }
 
 static void request_queue_push(unsigned char floor) {
@@ -304,34 +319,27 @@ static void request_queue_push(unsigned char floor) {
     req_count++;
 }
 
-/* Maps a debounced scan code to a valid floor index and enqueues it */
-static void handle_debounced_press(unsigned char scan_code) {
-    unsigned char key;
-
-    if (scan_code >= SCAN_CODE_LANDING_BASE &&
-        scan_code < (unsigned char)(SCAN_CODE_LANDING_BASE + FLOOR_COUNT)) {
-        request_queue_push((unsigned char)(scan_code - SCAN_CODE_LANDING_BASE));
-        return;
-    }
-
-    if (scan_code > SCAN_CODE_KEYPAD_BASE) {
-        key = (unsigned char)(scan_code - SCAN_CODE_KEYPAD_BASE);
-        switch (key) {
-            case 8:     /* Row 3 (RE2), Col 2 (RB1): Key '0' -> Ground Floor */
-                request_queue_push(FLOOR_0);
-                break;
-            case 1:     /* Row 1 (RE0), Col 1 (RB0): Key '1' -> Floor 1 */
-                request_queue_push(FLOOR_1);
-                break;
-            case 2:     /* Row 1 (RE0), Col 2 (RB1): Key '2' -> Floor 2 */
-                request_queue_push(FLOOR_2);
-                break;
-            case 3:     /* Row 1 (RE0), Col 3 (RB2): Key '3' -> Floor 3 */
-                request_queue_push(FLOOR_3);
-                break;
-            default:    /* Keys '4'..'6', '*', '#' reserved for diagnostics */
-                break;
-        }
+/* Maps a debounced 4x3 keypad key position (1..12) to a floor index.
+ * Supports both Team2tt.PDF (Row A on RB3) and AllSimulation.pdsprj (Row A on RE0). */
+static void handle_debounced_keypad(unsigned char key) {
+    switch (key) {
+        case 11:    /* Row D (RE2), Col 2 (RB1): Key '0' -> Ground Floor */
+            request_queue_push(FLOOR_0);
+            break;
+        case 1:     /* RB3 + RB0 (4-row wiring): Key '1' -> Floor 1 */
+        case 4:     /* RE0 + RB0 (3-row AllSimulation wiring): Key '1' -> Floor 1 */
+            request_queue_push(FLOOR_1);
+            break;
+        case 2:     /* RB3 + RB1 (4-row wiring): Key '2' -> Floor 2 */
+        case 5:     /* RE0 + RB1 (3-row AllSimulation wiring): Key '2' -> Floor 2 */
+            request_queue_push(FLOOR_2);
+            break;
+        case 3:     /* RB3 + RB2 (4-row wiring): Key '3' -> Floor 3 */
+        case 6:     /* RE0 + RB2 (3-row AllSimulation wiring): Key '3' -> Floor 3 */
+            request_queue_push(FLOOR_3);
+            break;
+        default:    /* Other keys reserved for diagnostics */
+            break;
     }
 }
 
@@ -422,10 +430,11 @@ void Inputs_Init(void) {
     TRISE.F4      = 0;          /* PSPMODE = 0: PORTE as general-purpose I/O   */
     OPTION_REG.F7 = 0;          /* NOT_RBPU = 0: Enable PORTB weak pull-ups    */
 
-    /* --- 3x3 Matrix Keypad GPIOs --- */
+    /* --- 4x3 Matrix Keypad GPIOs (Rows: RB3, RE0-RE2; Cols: RB0-RB2) --- */
     KEYPAD_ROW1_TRIS = 0;
     KEYPAD_ROW2_TRIS = 0;
     KEYPAD_ROW3_TRIS = 0;
+    KEYPAD_ROW4_TRIS = 0;
     KEYPAD_COL1_TRIS = 1;
     KEYPAD_COL2_TRIS = 1;
     KEYPAD_COL3_TRIS = 1;
@@ -448,11 +457,14 @@ void Inputs_Init(void) {
     BUZZER_PIN  = 0;
 
     /* --- Reset internal software state --- */
-    req_last_code  = SCAN_CODE_NONE;
-    req_stable_cnt = 0;
-    req_head       = 0;
-    req_tail       = 0;
-    req_count      = 0;
+    kp_last_key     = 0;
+    kp_stable_cnt   = 0;
+    btn_stable_mask = landing_buttons_read_raw_mask();
+    btn_last_mask   = btn_stable_mask;
+    btn_stable_cnt  = 0;
+    req_head        = 0;
+    req_tail        = 0;
+    req_count       = 0;
 
     hall_stable_mask = hall_read_raw_mask();
     hall_last_raw    = hall_stable_mask;
@@ -463,8 +475,10 @@ void Inputs_Init(void) {
 
     /* --- Initialize 16x2 LCD and display startup banner --- */
     lcd_hw_init();
-    lcd_cache[0][0] = 0;
-    lcd_cache[1][0] = 0;
+    for (pos = 0; pos < 17; pos++) {
+        lcd_cache[0][pos] = 0;
+        lcd_cache[1][pos] = 0;
+    }
 
     pos = buf_put_const_str(lcd_line_buf, 0, "  MINI ELEVATOR ");
     buf_pad_line(lcd_line_buf, pos);
@@ -476,19 +490,39 @@ void Inputs_Init(void) {
 }
 
 void Inputs_Update(void) {
-    unsigned char raw_code;
+    unsigned char raw_key;
+    unsigned char raw_btn;
+    unsigned char pressed_edges;
     unsigned char raw_hall;
 
-    /* 1. Scan & debounce keypad + landing buttons (30 ms, single event per press) */
-    raw_code = scan_all_inputs_raw();
-    if (raw_code != req_last_code) {
-        req_last_code  = raw_code;
-        req_stable_cnt = 0;
+    /* 1a. Scan & debounce 4x3 cabin keypad independently (never blocked by RA2-RA5) */
+    raw_key = keypad_scan_raw();
+    if (raw_key != kp_last_key) {
+        kp_last_key   = raw_key;
+        kp_stable_cnt = 0;
     }
-    else if (req_stable_cnt < INPUT_DEBOUNCE_TICKS) {
-        req_stable_cnt++;
-        if (req_stable_cnt == INPUT_DEBOUNCE_TICKS && raw_code != SCAN_CODE_NONE) {
-            handle_debounced_press(raw_code);
+    else if (kp_stable_cnt < INPUT_DEBOUNCE_TICKS) {
+        kp_stable_cnt++;
+        if (kp_stable_cnt == INPUT_DEBOUNCE_TICKS && raw_key != 0) {
+            handle_debounced_keypad(raw_key);
+        }
+    }
+
+    /* 1b. Scan & debounce external landing buttons (RA2-RA5) with rising-edge press detection */
+    raw_btn = landing_buttons_read_raw_mask();
+    if (raw_btn != btn_last_mask) {
+        btn_last_mask  = raw_btn;
+        btn_stable_cnt = 0;
+    }
+    else if (btn_stable_cnt < INPUT_DEBOUNCE_TICKS) {
+        btn_stable_cnt++;
+        if (btn_stable_cnt == INPUT_DEBOUNCE_TICKS) {
+            pressed_edges   = (unsigned char)(raw_btn & (unsigned char)(~btn_stable_mask));
+            btn_stable_mask = raw_btn;
+            if (pressed_edges & 0x01) request_queue_push(FLOOR_0);
+            if (pressed_edges & 0x02) request_queue_push(FLOOR_1);
+            if (pressed_edges & 0x04) request_queue_push(FLOOR_2);
+            if (pressed_edges & 0x08) request_queue_push(FLOOR_3);
         }
     }
 

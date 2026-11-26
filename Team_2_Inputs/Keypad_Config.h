@@ -18,15 +18,14 @@
  */
 
 /* ----------------------------------------------------------------------------
- * 1. 3x3 MATRIX KEYPAD CONFIGURATION
+ * 1. 4x3 MATRIX KEYPAD CONFIGURATION (Matches Team2tt.PDF / KEYPAD-PHONE)
  * ----------------------------------------------------------------------------
  * Physical Matrix Layout:
  *               COL 1 (RB0)      COL 2 (RB1)      COL 3 (RB2)
- *   ROW 1 (RE0)     '1'              '2'              '3'
- *   ROW 2 (RE1)     '4'              '5'              '6'
- *   ROW 3 (RE2)     '7'              '8'              '9'
- *   (Optional 4th row if standard 4x3 keypad hardware is used:
- *    ROW 4          '*'              '0'              '#' )
+ *   ROW A (RB3)     '1'              '2'              '3'
+ *   ROW B (RE0)     '4'              '5'              '6'
+ *   ROW C (RE1)     '7'              '8'              '9'
+ *   ROW D (RE2)     '*'              '0'              '#'
  *
  * Operational Key-to-Floor Logic Mapping:
  *   - Key '0' -> Calls FLOOR_0 (Ground Floor)
@@ -38,17 +37,20 @@
  * Scanning Methodology:
  *   - Active LOW Row Drive: Microcontroller drives one row LOW at a time.
  *   - Columns configured as inputs with internal weak pull-ups (OPTION_REG.NOT_RBPU = 0).
+ *   - Requires LVP Disabled in PIC16F877A config bits so RB3 is general-purpose I/O.
  *   - When key is pressed, column reads LOW (0V).
  */
 
 /* Keypad Row Pins (Outputs, Driven Active Low) */
-#define KEYPAD_ROW1_PIN             PORTE.F0    /* DIP Pin 8  - RE0/AN5 */
-#define KEYPAD_ROW2_PIN             PORTE.F1    /* DIP Pin 9  - RE1/AN6 */
-#define KEYPAD_ROW3_PIN             PORTE.F2    /* DIP Pin 10 - RE2/AN7 */
+#define KEYPAD_ROW1_PIN             PORTB.F3    /* DIP Pin 36 - RB3 (Row A: 1,2,3) */
+#define KEYPAD_ROW2_PIN             PORTE.F0    /* DIP Pin 8  - RE0 (Row B: 4,5,6) */
+#define KEYPAD_ROW3_PIN             PORTE.F1    /* DIP Pin 9  - RE1 (Row C: 7,8,9) */
+#define KEYPAD_ROW4_PIN             PORTE.F2    /* DIP Pin 10 - RE2 (Row D: *,0,#) */
 
-#define KEYPAD_ROW1_TRIS            TRISE.F0    /* 0 = Output */
-#define KEYPAD_ROW2_TRIS            TRISE.F1    /* 0 = Output */
-#define KEYPAD_ROW3_TRIS            TRISE.F2    /* 0 = Output */
+#define KEYPAD_ROW1_TRIS            TRISB.F3    /* 0 = Output */
+#define KEYPAD_ROW2_TRIS            TRISE.F0    /* 0 = Output */
+#define KEYPAD_ROW3_TRIS            TRISE.F1    /* 0 = Output */
+#define KEYPAD_ROW4_TRIS            TRISE.F2    /* 0 = Output */
 
 /* Keypad Column Pins (Inputs, Active Low, Weak Pull-ups) */
 #define KEYPAD_COL1_PIN             PORTB.F0    /* DIP Pin 33 - RB0/INT */

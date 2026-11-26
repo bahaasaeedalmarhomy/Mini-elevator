@@ -4,6 +4,7 @@ main
 		Motor_EnterState
 	Inputs_Init
 		keypad_rows_idle
+		landing_buttons_read_raw_mask
 		hall_read_raw_mask
 		lcd_hw_init
 			lcd_write_nibble
@@ -31,6 +32,7 @@ main
 			Div_32x32_S
 				SDIV3232L
 				COMFREM
+			Div_32x32_U
 		Tare_Finish
 			Div_32x32_S
 				SDIV3232L
@@ -48,12 +50,13 @@ main
 			Dir_Apply
 			Motor_EnterState
 	Inputs_Update
-		scan_all_inputs_raw
-			keypad_scan_raw
-				keypad_rows_idle
-				Mul_8X8_U
-		handle_debounced_press
+		keypad_scan_raw
+			keypad_rows_idle
+			Mul_8X8_U
+		handle_debounced_keypad
 			request_queue_push
+		landing_buttons_read_raw_mask
+		request_queue_push
 		hall_read_raw_mask
 		buzzer_service_tick
 	Controller_Update
@@ -102,5 +105,4 @@ main
 			buf_put_const_str
 				____DoICP
 			buf_put_ulong
-				Div_32x32_U
 interrupt

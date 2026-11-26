@@ -99,6 +99,7 @@ unsigned char RequestHandler_GetCount(void);
 #line 28 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
 static unsigned char controller_state =  0 ;
 static unsigned char current_floor =  255 ;
+static unsigned char last_known_floor =  255 ;
 static unsigned char target_floor =  255 ;
 static signed char direction =  0 ;
 static signed char last_direction =  0 ;
@@ -107,29 +108,33 @@ static signed char last_direction =  0 ;
 static unsigned int state_ticks = 0;
 static unsigned int startup_ticks = 0;
 static unsigned int travel_ticks = 0;
-#line 42 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 43 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
 static void Controller_EnterState(unsigned char new_state) {
  controller_state = new_state;
  state_ticks = 0;
 }
-#line 50 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 51 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
 static void Controller_ReadRequests(void) {
  unsigned char requested_floor =  255 ;
 
- if (Inputs_GetNewFloorRequest(&requested_floor) != 0) {
+ while (Inputs_GetNewFloorRequest(&requested_floor) != 0) {
  if ( ((requested_floor) <= 3 ) ) {
  RequestHandler_Add(requested_floor);
  }
  }
 }
-#line 63 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 64 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
 static void Controller_UpdateCurrentFloor(void) {
  current_floor = Inputs_GetCurrentFloor();
+ if ( ((current_floor) <= 3 ) ) {
+ last_known_floor = current_floor;
+ }
 }
-#line 72 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 76 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
 void Controller_Init(void) {
  controller_state =  0 ;
  current_floor =  255 ;
+ last_known_floor =  255 ;
  target_floor =  255 ;
  direction =  0 ;
  last_direction =  0 ;
@@ -147,8 +152,12 @@ void Controller_Init(void) {
 
  Inputs_Buzzer( 4 );
 }
-#line 97 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 102 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
 void Controller_Update(void) {
+ unsigned char optimal;
+ unsigned char ref_floor;
+ unsigned char display_target;
+
 
  Controller_ReadRequests();
  Controller_UpdateCurrentFloor();
@@ -184,7 +193,7 @@ void Controller_Update(void) {
 
 
  switch (controller_state) {
-#line 138 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 147 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
  case  0 :
  Motor_Stop();
  Brake_Engage();
@@ -203,7 +212,7 @@ void Controller_Update(void) {
  Controller_EnterState( 8 );
  }
  break;
-#line 161 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 170 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
  case  1 :
  Motor_Stop();
  Brake_Engage();
@@ -223,31 +232,41 @@ void Controller_Update(void) {
 
 
  if (RequestHandler_HasRequests() != 0) {
- target_floor = RequestHandler_GetNextOptimal(current_floor, last_direction);
+ ref_floor = (current_floor !=  255 ) ? current_floor : last_known_floor;
+ target_floor = RequestHandler_GetNextOptimal(ref_floor, last_direction);
 
  if (target_floor ==  255 ) {
  break;
  }
 
 
- if (target_floor == current_floor) {
+ if (current_floor !=  255  && target_floor == current_floor) {
  RequestHandler_Remove(target_floor);
  Inputs_Buzzer( 1 );
  target_floor =  255 ;
  direction =  0 ;
+ if (RequestHandler_HasRequests() == 0) {
  last_direction =  0 ;
  }
+ }
 
- else if (target_floor > current_floor) {
+ else if (ref_floor !=  255  && target_floor > ref_floor) {
  direction =  1 ;
  last_direction =  1 ;
  Brake_Release();
  Controller_EnterState( 2 );
  }
 
- else if (target_floor < current_floor) {
+ else if (ref_floor !=  255  && target_floor < ref_floor) {
  direction =  -1 ;
  last_direction =  -1 ;
+ Brake_Release();
+ Controller_EnterState( 2 );
+ }
+
+ else if (current_floor ==  255  && ref_floor !=  255  && target_floor == ref_floor) {
+ direction = (last_direction ==  1 ) ?  -1  :  1 ;
+ last_direction = direction;
  Brake_Release();
  Controller_EnterState( 2 );
  }
@@ -256,12 +275,22 @@ void Controller_Update(void) {
  last_direction =  0 ;
  }
  break;
-#line 218 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 237 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
  case  2 :
 
  if (current_floor !=  255  && direction !=  0 ) {
- unsigned char optimal = RequestHandler_GetNextOptimal(current_floor, direction);
- if (optimal !=  255 ) {
+ optimal = RequestHandler_GetNextOptimal(current_floor, direction);
+ if (optimal == current_floor) {
+
+ RequestHandler_Remove(current_floor);
+ Inputs_Buzzer( 1 );
+ Brake_Engage();
+ target_floor =  255 ;
+ direction =  0 ;
+ Controller_EnterState( 1 );
+ break;
+ }
+ else if (optimal !=  255 ) {
  target_floor = optimal;
  }
  }
@@ -284,10 +313,18 @@ void Controller_Update(void) {
  }
  }
  break;
-#line 250 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 279 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
  case  3 :
  Motor_Set( 1 ,  65 );
 
+
+ if (last_known_floor !=  255  && target_floor !=  255 ) {
+ optimal = RequestHandler_GetNextOptimal(last_known_floor,  1 );
+ if (optimal !=  255  && optimal > last_known_floor && optimal < target_floor) {
+ target_floor = optimal;
+ }
+ }
+
  if (travel_ticks < 65535u) {
  travel_ticks++;
  }
@@ -309,10 +346,18 @@ void Controller_Update(void) {
  Controller_EnterState( 5 );
  }
  break;
-#line 279 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 316 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
  case  4 :
  Motor_Set( -1 ,  65 );
 
+
+ if (last_known_floor !=  255  && target_floor !=  255 ) {
+ optimal = RequestHandler_GetNextOptimal(last_known_floor,  -1 );
+ if (optimal !=  255  && optimal < last_known_floor && optimal > target_floor) {
+ target_floor = optimal;
+ }
+ }
+
  if (travel_ticks < 65535u) {
  travel_ticks++;
  }
@@ -334,7 +379,7 @@ void Controller_Update(void) {
  Controller_EnterState( 5 );
  }
  break;
-#line 308 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 353 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
  case  5 :
  Motor_Stop();
 
@@ -343,7 +388,7 @@ void Controller_Update(void) {
  Controller_EnterState( 6 );
  }
  break;
-#line 321 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 366 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
  case  6 :
  Motor_Stop();
 
@@ -361,7 +406,7 @@ void Controller_Update(void) {
  }
  }
  break;
-#line 343 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 388 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
  case  7 :
  Motor_Stop();
  Brake_Engage();
@@ -371,7 +416,7 @@ void Controller_Update(void) {
  Controller_EnterState( 1 );
  }
  break;
-#line 357 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 402 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
  case  8 :
  Motor_Stop();
  Brake_Engage();
@@ -392,20 +437,25 @@ void Controller_Update(void) {
  }
 
 
+ ref_floor = (current_floor !=  255 ) ? current_floor : last_known_floor;
+ display_target = (target_floor !=  255 )
+ ? target_floor
+ : RequestHandler_GetNextOptimal(ref_floor, last_direction);
+
  Inputs_DisplayStatus(current_floor,
- target_floor,
+ display_target,
  controller_state,
  Weight_GetGrams());
 }
-#line 386 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 436 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
 unsigned char Controller_GetState(void) {
  return controller_state;
 }
-#line 393 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 443 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
 unsigned char Controller_GetCurrentFloor(void) {
  return current_floor;
 }
-#line 400 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 450 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
 unsigned char Controller_GetTargetFloor(void) {
  return target_floor;
 }

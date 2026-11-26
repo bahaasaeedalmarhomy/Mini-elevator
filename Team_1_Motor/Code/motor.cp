@@ -137,6 +137,7 @@ static signed long HX711_ReadRaw(void)
  }
 
  HX711_SCK = 1;
+ Delay_us(1);
  HX711_SCK = 0;
 
  if (v & 0x00800000UL) v |= 0xFF000000UL;
@@ -173,11 +174,11 @@ static void Weight_PushSample(signed long raw)
  sum = sum /  2 ;
 
  diff = sum - hx_offset;
-#line 237 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_1_Motor/Code/motor.c"
+#line 238 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_1_Motor/Code/motor.c"
  if (diff <= 0) {
  weight_g = 0;
  } else {
- weight_g = ((unsigned long)diff + ( 1L  / 2)) /  1L ;
+ weight_g = ((unsigned long)diff + ( 215L  / 2)) /  215L ;
  }
 
 
@@ -190,7 +191,7 @@ static void Weight_PushSample(signed long raw)
  }
 
 }
-#line 258 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_1_Motor/Code/motor.c"
+#line 259 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_1_Motor/Code/motor.c"
 void Motor_Init(void)
 {
  unsigned char i;
@@ -252,7 +253,7 @@ void Motor_Init(void)
 
 
  Motor_EnterState( 0 );
-#line 322 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_1_Motor/Code/motor.c"
+#line 323 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_1_Motor/Code/motor.c"
 }
 
 void Motor_Update(void)
@@ -271,7 +272,7 @@ void Motor_Update(void)
 
 
  switch (motor_state) {
-#line 346 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_1_Motor/Code/motor.c"
+#line 347 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_1_Motor/Code/motor.c"
  case  0 :
  if (HX711_DT == 0) {
  raw = HX711_ReadRaw();
@@ -291,7 +292,7 @@ void Motor_Update(void)
  Motor_EnterState( 1 );
  }
  break;
-#line 370 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_1_Motor/Code/motor.c"
+#line 371 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_1_Motor/Code/motor.c"
  case  1 :
  if (tgt_dir !=  0  && state_ticks >=  10 ) {
  cur_dir = tgt_dir;
@@ -299,7 +300,7 @@ void Motor_Update(void)
  Motor_EnterState( 2 );
  }
  break;
-#line 381 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_1_Motor/Code/motor.c"
+#line 382 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_1_Motor/Code/motor.c"
  case  2 :
  if (tgt_dir != cur_dir) {
  Motor_EnterState( 3 );
@@ -307,7 +308,7 @@ void Motor_Update(void)
  }
  Speed_Ramp(tgt_speed);
  break;
-#line 393 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_1_Motor/Code/motor.c"
+#line 394 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_1_Motor/Code/motor.c"
  case  3 :
  if (tgt_dir == cur_dir) {
  Motor_EnterState( 2 );
@@ -345,7 +346,7 @@ void Motor_Stop(void)
  Dir_Apply( 0 );
  tgt_dir = cur_dir =  0 ;
  tgt_speed = cur_speed = 0;
-#line 434 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_1_Motor/Code/motor.c"
+#line 435 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_1_Motor/Code/motor.c"
  if (motor_state ==  2  || motor_state ==  3 ) {
  Motor_EnterState( 1 );
  }

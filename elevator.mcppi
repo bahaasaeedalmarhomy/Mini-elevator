@@ -6,7 +6,7 @@ Value=-1
 [BUILD_TYPE]
 Value=0
 [ACTIVE_TAB]
-Value=Team_1_Motor\Code\motor.c
+Value=Team_3_Controller\Code\main.c
 [USE_EEPROM]
 Value=0
 [USE_HEAP]
@@ -39,17 +39,17 @@ Count=0
 [OTHER_FILES]
 Count=0
 [SEARCH_PATH]
-Count=12
+Count=10
 Path0=C:\Users\Ahmed\Documents\Mikroelektronika\mikroC PRO for PIC\Defs\
 Path1=C:\Users\Ahmed\Documents\Mikroelektronika\mikroC PRO for PIC\Uses\P16\
 Path2=C:\Users\Ahmed\Desktop\college\project embeded\Mini_Elevator_Compile\
-Path5=C:\Users\Ahmed\Desktop\college\project embeded\Mini_Elevator_Compile\Shared\
-Path6=C:\Users\Ahmed\Desktop\college\project embeded\Mini_Elevator_Compile\Team_1_Motor\
-Path7=C:\Users\Ahmed\Desktop\college\project embeded\Mini_Elevator_Compile\Team_1_Motor\Code\
-Path8=C:\Users\Ahmed\Desktop\college\project embeded\Mini_Elevator_Compile\Team_2_Inputs\
-Path9=C:\Users\Ahmed\Desktop\college\project embeded\Mini_Elevator_Compile\Team_2_Inputs\Code\
-Path10=C:\Users\Ahmed\Desktop\college\project embeded\Mini_Elevator_Compile\Team_3_Controller\
-Path11=C:\Users\Ahmed\Desktop\college\project embeded\Mini_Elevator_Compile\Team_3_Controller\Code\
+Path3=C:\Users\Ahmed\Desktop\college\project embeded\Mini_Elevator_Compile\Shared\
+Path4=C:\Users\Ahmed\Desktop\college\project embeded\Mini_Elevator_Compile\Team_1_Motor\
+Path5=C:\Users\Ahmed\Desktop\college\project embeded\Mini_Elevator_Compile\Team_1_Motor\Code\
+Path6=C:\Users\Ahmed\Desktop\college\project embeded\Mini_Elevator_Compile\Team_2_Inputs\
+Path7=C:\Users\Ahmed\Desktop\college\project embeded\Mini_Elevator_Compile\Team_2_Inputs\Code\
+Path8=C:\Users\Ahmed\Desktop\college\project embeded\Mini_Elevator_Compile\Team_3_Controller\
+Path9=C:\Users\Ahmed\Desktop\college\project embeded\Mini_Elevator_Compile\Team_3_Controller\Code\
 [HEADER_PATH]
 Count=5
 Path0=C:\Users\Ahmed\Desktop\college\project embeded\Mini_Elevator_Compile\
