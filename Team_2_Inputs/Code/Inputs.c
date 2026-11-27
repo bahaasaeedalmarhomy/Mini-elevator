@@ -7,9 +7,11 @@
  * Toolchain:       mikroC PRO for PIC / ANSI C (C89)
  *
  * Hardware Managed:
- *   - 3x3 Matrix Keypad: Rows RE0-RE2 (Active LOW), Cols RB0-RB2 (Pull-ups)
- *   - 4 Landing Call Pushbuttons: RA2-RA5 (Active LOW, Floor 0..3)
- *   - 4 Hall Effect Floor Sensors: RC3-RC6 (Active LOW, Floor 0..3)
+ *   - 4x4 Matrix Keypad (KEYPAD-SMALLCALC on PORTB):
+ *       Rows: RB4 (A), RB5 (B), RB6 (C), RB7 (D) (Active LOW drive)
+ *       Cols: RB0 (1), RB1 (2), RB2 (3), RB3 (4) (Internal weak pull-ups)
+ *   - 4 Landing Call Pushbuttons: RA2-RA5 (Active HIGH, Floor 0..3)
+ *   - 4 Hall Effect Floor Sensors: RC3-RC6 (Active HIGH, Floor 0..3)
  *   - 16x2 Alphanumeric LCD (HD44780, 4-bit mode): RD2-RD7
  *   - Audio Piezo Buzzer (NPN driver): RC7 (Active HIGH)
  *
@@ -240,50 +242,52 @@ static void lcd_flush_if_changed(unsigned char row) {
  * ============================================================================
  */
 static void keypad_rows_idle(void) {
-    KEYPAD_ROW1_PIN = 1;
-    KEYPAD_ROW2_PIN = 1;
-    KEYPAD_ROW3_PIN = 1;
-    KEYPAD_ROW4_PIN = 1;
+    /* Atomic byte write to PORTB avoids Read-Modify-Write glitches on PIC16F877A.
+     * Input bits (RB0..RB3) ignore PORT writes; output rows (RB4..RB7) are all
+     * driven HIGH (idle). */
+    PORTB = 0xFF;
 }
 
 /*
- * Scans the 4x3 matrix (Team2tt.PDF) using active-LOW row drive and PORTB pull-ups.
- * Returns 0 if no key is pressed, otherwise key position 1..12:
- *   Row A (RB3):  1='1',  2='2',  3='3'
- *   Row B (RE0):  4='4',  5='5',  6='6'
- *   Row C (RE1):  7='7',  8='8',  9='9'
- *   Row D (RE2): 10='*', 11='0', 12='#'
+ * Scans the 4x4 calculator matrix (KEYPAD-SMALLCALC on PORTB) using active-LOW
+ * row drive (RB4..RB7) and internal PORTB weak pull-ups on columns (RB0..RB3).
+ * Returns 0 if no key is pressed, otherwise key position 1..16 (row*4 + col):
+ *   Row A (RB4):  1='7',    2='8',  3='9',  4='/'
+ *   Row B (RB5):  5='4',    6='5',  7='6',  8='*'
+ *   Row C (RB6):  9='1',   10='2', 11='3', 12='-'
+ *   Row D (RB7): 13='ON/C',14='0', 15='=', 16='+'
  */
 static unsigned char keypad_scan_raw(void) {
     unsigned char row;
     unsigned char key = 0;
 
     for (row = 0; row < 4 && key == 0; row++) {
-        keypad_rows_idle();
-
         if (row == 0) {
-            KEYPAD_ROW1_PIN = 0;
+            PORTB = 0xEF;   /* Drive Row A (RB4) LOW, all other rows HIGH */
         }
         else if (row == 1) {
-            KEYPAD_ROW2_PIN = 0;
+            PORTB = 0xDF;   /* Drive Row B (RB5) LOW, all other rows HIGH */
         }
         else if (row == 2) {
-            KEYPAD_ROW3_PIN = 0;
+            PORTB = 0xBF;   /* Drive Row C (RB6) LOW, all other rows HIGH */
         }
         else {
-            KEYPAD_ROW4_PIN = 0;
+            PORTB = 0x7F;   /* Drive Row D (RB7) LOW, all other rows HIGH */
         }
 
         Delay_us(20);   /* Allow PORTB weak pull-up capacitance to settle */
 
         if (KEYPAD_COL1_PIN == 0) {
-            key = (unsigned char)(row * 3 + 1);
+            key = (unsigned char)(row * 4 + 1);
         }
         else if (KEYPAD_COL2_PIN == 0) {
-            key = (unsigned char)(row * 3 + 2);
+            key = (unsigned char)(row * 4 + 2);
         }
         else if (KEYPAD_COL3_PIN == 0) {
-            key = (unsigned char)(row * 3 + 3);
+            key = (unsigned char)(row * 4 + 3);
+        }
+        else if (KEYPAD_COL4_PIN == 0) {
+            key = (unsigned char)(row * 4 + 4);
         }
     }
 
@@ -291,14 +295,14 @@ static unsigned char keypad_scan_raw(void) {
     return key;
 }
 
-/* Reads external landing call buttons (RA2..RA5, active LOW) as a 4-bit mask */
+/* Reads external landing call buttons (RA2..RA5, active HIGH) as a 4-bit mask */
 static unsigned char landing_buttons_read_raw_mask(void) {
     unsigned char mask = 0;
 
-    if (BTN_FLOOR_0_PIN == 0) mask |= 0x01;
-    if (BTN_FLOOR_1_PIN == 0) mask |= 0x02;
-    if (BTN_FLOOR_2_PIN == 0) mask |= 0x04;
-    if (BTN_FLOOR_3_PIN == 0) mask |= 0x08;
+    if (BTN_FLOOR_0_PIN == BTN_ACTIVE_LEVEL) mask |= 0x01;
+    if (BTN_FLOOR_1_PIN == BTN_ACTIVE_LEVEL) mask |= 0x02;
+    if (BTN_FLOOR_2_PIN == BTN_ACTIVE_LEVEL) mask |= 0x04;
+    if (BTN_FLOOR_3_PIN == BTN_ACTIVE_LEVEL) mask |= 0x08;
 
     return mask;
 }
@@ -319,23 +323,19 @@ static void request_queue_push(unsigned char floor) {
     req_count++;
 }
 
-/* Maps a debounced 4x3 keypad key position (1..12) to a floor index.
- * Supports both Team2tt.PDF (Row A on RB3) and AllSimulation.pdsprj (Row A on RE0). */
+/* Maps a debounced 4x4 calculator keypad key position (1..16) to a floor index. */
 static void handle_debounced_keypad(unsigned char key) {
     switch (key) {
-        case 11:    /* Row D (RE2), Col 2 (RB1): Key '0' -> Ground Floor */
+        case 14:    /* Row D (RB7), Col 2 (RB1): Key '0' -> Ground Floor */
             request_queue_push(FLOOR_0);
             break;
-        case 1:     /* RB3 + RB0 (4-row wiring): Key '1' -> Floor 1 */
-        case 4:     /* RE0 + RB0 (3-row AllSimulation wiring): Key '1' -> Floor 1 */
+        case 9:     /* Row C (RB6), Col 1 (RB0): Key '1' -> Floor 1 */
             request_queue_push(FLOOR_1);
             break;
-        case 2:     /* RB3 + RB1 (4-row wiring): Key '2' -> Floor 2 */
-        case 5:     /* RE0 + RB1 (3-row AllSimulation wiring): Key '2' -> Floor 2 */
+        case 10:    /* Row C (RB6), Col 2 (RB1): Key '2' -> Floor 2 */
             request_queue_push(FLOOR_2);
             break;
-        case 3:     /* RB3 + RB2 (4-row wiring): Key '3' -> Floor 3 */
-        case 6:     /* RE0 + RB2 (3-row AllSimulation wiring): Key '3' -> Floor 3 */
+        case 11:    /* Row C (RB6), Col 3 (RB2): Key '3' -> Floor 3 */
             request_queue_push(FLOOR_3);
             break;
         default:    /* Other keys reserved for diagnostics */
@@ -350,10 +350,10 @@ static void handle_debounced_keypad(unsigned char key) {
 static unsigned char hall_read_raw_mask(void) {
     unsigned char mask = 0;
 
-    if (HALL_FLOOR_0_PIN == 0) mask |= 0x01;
-    if (HALL_FLOOR_1_PIN == 0) mask |= 0x02;
-    if (HALL_FLOOR_2_PIN == 0) mask |= 0x04;
-    if (HALL_FLOOR_3_PIN == 0) mask |= 0x08;
+    if (HALL_FLOOR_0_PIN == HALL_ACTIVE_LEVEL) mask |= 0x01;
+    if (HALL_FLOOR_1_PIN == HALL_ACTIVE_LEVEL) mask |= 0x02;
+    if (HALL_FLOOR_2_PIN == HALL_ACTIVE_LEVEL) mask |= 0x04;
+    if (HALL_FLOOR_3_PIN == HALL_ACTIVE_LEVEL) mask |= 0x08;
 
     return mask;
 }
@@ -430,7 +430,7 @@ void Inputs_Init(void) {
     TRISE.F4      = 0;          /* PSPMODE = 0: PORTE as general-purpose I/O   */
     OPTION_REG.F7 = 0;          /* NOT_RBPU = 0: Enable PORTB weak pull-ups    */
 
-    /* --- 4x3 Matrix Keypad GPIOs (Rows: RB3, RE0-RE2; Cols: RB0-RB2) --- */
+    /* --- 4x4 Matrix Keypad GPIOs (All on PORTB: Rows RB4-RB7; Cols RB0-RB3) --- */
     KEYPAD_ROW1_TRIS = 0;
     KEYPAD_ROW2_TRIS = 0;
     KEYPAD_ROW3_TRIS = 0;
@@ -438,6 +438,7 @@ void Inputs_Init(void) {
     KEYPAD_COL1_TRIS = 1;
     KEYPAD_COL2_TRIS = 1;
     KEYPAD_COL3_TRIS = 1;
+    KEYPAD_COL4_TRIS = 1;
     keypad_rows_idle();
 
     /* --- External Landing Call Buttons (RA2-RA5 inputs) --- */

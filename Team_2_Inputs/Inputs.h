@@ -8,9 +8,9 @@
  * TEAM 2 PUBLIC INTERFACE - INPUTS, SENSORS, DISPLAY & BUZZER
  * ============================================================================
  * Hardware Responsibilities:
- *   - 3x3 Matrix Keypad (Rows RE0-RE2, Cols RB0-RB2)
- *   - 4 External Landing Call Pushbuttons (RA2-RA5)
- *   - 4 Hall Effect Floor Detection Sensors (RC3-RC6)
+ *   - 4x4 Matrix Keypad on PORTB (Rows RB4-RB7; Cols RB0-RB3)
+ *   - 4 External Landing Call Pushbuttons (RA2-RA5, Active HIGH)
+ *   - 4 Hall Effect Floor Detection Sensors (RC3-RC6, Active HIGH)
  *   - Alphanumeric 16x2 LCD in 4-bit mode (RD2-RD7)
  *   - Audio Buzzer with NPN transistor driver (RC7)
  *

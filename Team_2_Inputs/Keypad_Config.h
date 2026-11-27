@@ -18,59 +18,64 @@
  */
 
 /* ----------------------------------------------------------------------------
- * 1. 4x3 MATRIX KEYPAD CONFIGURATION (Matches Team2tt.PDF / KEYPAD-PHONE)
+ * 1. 4x4 MATRIX KEYPAD CONFIGURATION (KEYPAD-SMALLCALC on PORTB)
  * ----------------------------------------------------------------------------
- * Physical Matrix Layout:
- *               COL 1 (RB0)      COL 2 (RB1)      COL 3 (RB2)
- *   ROW A (RB3)     '1'              '2'              '3'
- *   ROW B (RE0)     '4'              '5'              '6'
- *   ROW C (RE1)     '7'              '8'              '9'
- *   ROW D (RE2)     '*'              '0'              '#'
+ * Physical Matrix Layout (All 8 pins on PORTB):
+ *               COL 1 (RB0)  COL 2 (RB1)  COL 3 (RB2)  COL 4 (RB3)
+ *   ROW A (RB4)     '7'          '8'          '9'          '/'
+ *   ROW B (RB5)     '4'          '5'          '6'          '*'
+ *   ROW C (RB6)     '1'          '2'          '3'          '-'
+ *   ROW D (RB7)    'ON/C'        '0'          '='          '+'
  *
  * Operational Key-to-Floor Logic Mapping:
- *   - Key '0' -> Calls FLOOR_0 (Ground Floor)
- *   - Key '1' -> Calls FLOOR_1 (First Floor)
- *   - Key '2' -> Calls FLOOR_2 (Second Floor)
- *   - Key '3' -> Calls FLOOR_3 (Third Floor)
- *   - Keys '4'..'9', '*', '#' -> Reserved for test diagnostics & maintenance
+ *   - Key '0' (Row D / Col 2) -> Calls FLOOR_0 (Ground Floor)
+ *   - Key '1' (Row C / Col 1) -> Calls FLOOR_1 (First Floor)
+ *   - Key '2' (Row C / Col 2) -> Calls FLOOR_2 (Second Floor)
+ *   - Key '3' (Row C / Col 3) -> Calls FLOOR_3 (Third Floor)
+ *   - All other keys -> Reserved for test diagnostics & maintenance
  *
  * Scanning Methodology:
- *   - Active LOW Row Drive: Microcontroller drives one row LOW at a time.
- *   - Columns configured as inputs with internal weak pull-ups (OPTION_REG.NOT_RBPU = 0).
- *   - Requires LVP Disabled in PIC16F877A config bits so RB3 is general-purpose I/O.
+ *   - Active LOW Row Drive: Microcontroller drives one row (RB4..RB7) LOW at a time.
+ *   - Columns (RB0..RB3) configured as inputs with internal weak pull-ups (OPTION_REG.NOT_RBPU = 0).
+ *   - Requires LVP Disabled (frees RB3) and DEBUG Disabled (frees RB6/RB7) in config bits.
  *   - When key is pressed, column reads LOW (0V).
  */
 
 /* Keypad Row Pins (Outputs, Driven Active Low) */
-#define KEYPAD_ROW1_PIN             PORTB.F3    /* DIP Pin 36 - RB3 (Row A: 1,2,3) */
-#define KEYPAD_ROW2_PIN             PORTE.F0    /* DIP Pin 8  - RE0 (Row B: 4,5,6) */
-#define KEYPAD_ROW3_PIN             PORTE.F1    /* DIP Pin 9  - RE1 (Row C: 7,8,9) */
-#define KEYPAD_ROW4_PIN             PORTE.F2    /* DIP Pin 10 - RE2 (Row D: *,0,#) */
+#define KEYPAD_ROW1_PIN             PORTB.F4    /* DIP Pin 37 - RB4 (Row A: 7,8,9,/) */
+#define KEYPAD_ROW2_PIN             PORTB.F5    /* DIP Pin 38 - RB5 (Row B: 4,5,6,*) */
+#define KEYPAD_ROW3_PIN             PORTB.F6    /* DIP Pin 39 - RB6 (Row C: 1,2,3,-) */
+#define KEYPAD_ROW4_PIN             PORTB.F7    /* DIP Pin 40 - RB7 (Row D: ON/C,0,=,+ ) */
 
-#define KEYPAD_ROW1_TRIS            TRISB.F3    /* 0 = Output */
-#define KEYPAD_ROW2_TRIS            TRISE.F0    /* 0 = Output */
-#define KEYPAD_ROW3_TRIS            TRISE.F1    /* 0 = Output */
-#define KEYPAD_ROW4_TRIS            TRISE.F2    /* 0 = Output */
+#define KEYPAD_ROW1_TRIS            TRISB.F4    /* 0 = Output */
+#define KEYPAD_ROW2_TRIS            TRISB.F5    /* 0 = Output */
+#define KEYPAD_ROW3_TRIS            TRISB.F6    /* 0 = Output */
+#define KEYPAD_ROW4_TRIS            TRISB.F7    /* 0 = Output */
 
-/* Keypad Column Pins (Inputs, Active Low, Weak Pull-ups) */
+/* Keypad Column Pins (Inputs, Active Low, Internal PORTB Weak Pull-ups) */
 #define KEYPAD_COL1_PIN             PORTB.F0    /* DIP Pin 33 - RB0/INT */
 #define KEYPAD_COL2_PIN             PORTB.F1    /* DIP Pin 34 - RB1 */
 #define KEYPAD_COL3_PIN             PORTB.F2    /* DIP Pin 35 - RB2 */
+#define KEYPAD_COL4_PIN             PORTB.F3    /* DIP Pin 36 - RB3/PGM */
 
 #define KEYPAD_COL1_TRIS            TRISB.F0    /* 1 = Input */
 #define KEYPAD_COL2_TRIS            TRISB.F1    /* 1 = Input */
 #define KEYPAD_COL3_TRIS            TRISB.F2    /* 1 = Input */
+#define KEYPAD_COL4_TRIS            TRISB.F3    /* 1 = Input */
 
 /* ----------------------------------------------------------------------------
  * 2. EXTERNAL LANDING CALL BUTTONS
  * ----------------------------------------------------------------------------
  * Stationed at each floor hoistway entrance.
- * Normally Open tactile switches tied to ground when pressed (Active LOW).
+ * Normally Open tactile switches with pull-down resistors to GND, switched to
+ * +5V when pressed (Active HIGH).
  */
-#define BTN_FLOOR_0_PIN             PORTA.F2    /* DIP Pin 4 - RA2/AN2 (Requires 10k pull-up) */
-#define BTN_FLOOR_1_PIN             PORTA.F3    /* DIP Pin 5 - RA3/AN3 (Requires 10k pull-up) */
-#define BTN_FLOOR_2_PIN             PORTA.F4    /* DIP Pin 6 - RA4/T0CKI (Open Drain! 4.7k pull-up) */
-#define BTN_FLOOR_3_PIN             PORTA.F5    /* DIP Pin 7 - RA5/AN4 (Requires 10k pull-up) */
+#define BTN_ACTIVE_LEVEL            1           /* Active HIGH (pull-down to GND, switch to +5V) */
+
+#define BTN_FLOOR_0_PIN             PORTA.F2    /* DIP Pin 4 - RA2/AN2 (10k pull-down) */
+#define BTN_FLOOR_1_PIN             PORTA.F3    /* DIP Pin 5 - RA3/AN3 (10k pull-down) */
+#define BTN_FLOOR_2_PIN             PORTA.F4    /* DIP Pin 6 - RA4/T0CKI (4.7k pull-down) */
+#define BTN_FLOOR_3_PIN             PORTA.F5    /* DIP Pin 7 - RA5/AN4 (10k pull-down) */
 
 #define BTN_FLOOR_0_TRIS            TRISA.F2    /* 1 = Input */
 #define BTN_FLOOR_1_TRIS            TRISA.F3    /* 1 = Input */
@@ -81,12 +86,14 @@
  * 3. HALL EFFECT FLOOR POSITION SENSORS
  * ----------------------------------------------------------------------------
  * Stationed at each floor landing. Detects permanent magnet mounted on cabin.
- * Active LOW output (NPN open-collector with 10k pull-up to +5V).
+ * Active HIGH in AllSimulation.PDF (10k pull-down to GND, switch to +5V).
  */
-#define HALL_FLOOR_0_PIN            PORTC.F3    /* DIP Pin 18 - RC3 */
-#define HALL_FLOOR_1_PIN            PORTC.F4    /* DIP Pin 23 - RC4 */
-#define HALL_FLOOR_2_PIN            PORTC.F5    /* DIP Pin 24 - RC5 */
-#define HALL_FLOOR_3_PIN            PORTC.F6    /* DIP Pin 25 - RC6 */
+#define HALL_ACTIVE_LEVEL           1           /* Active HIGH (pull-down to GND, switch to +5V) */
+
+#define HALL_FLOOR_0_PIN            PORTC.F3    /* DIP Pin 18 - RC3 (RC3_BTN) */
+#define HALL_FLOOR_1_PIN            PORTC.F4    /* DIP Pin 23 - RC4 (RC4_BTN) */
+#define HALL_FLOOR_2_PIN            PORTC.F5    /* DIP Pin 24 - RC5 (RC5_BTN) */
+#define HALL_FLOOR_3_PIN            PORTC.F6    /* DIP Pin 25 - RC6 (RC6_BTN) */
 
 #define HALL_FLOOR_0_TRIS           TRISC.F3    /* 1 = Input */
 #define HALL_FLOOR_1_TRIS           TRISC.F4    /* 1 = Input */
