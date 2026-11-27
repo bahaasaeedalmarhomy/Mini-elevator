@@ -53,12 +53,12 @@ L_Inputs_lcd_send_byte2:
 	CLRF       Inputs_?FLOC__Inputs_lcd_send_byteT10+0
 L_Inputs_lcd_send_byte3:
 	BTFSC      Inputs_?FLOC__Inputs_lcd_send_byteT10+0, 0
-	GOTO       L_Inputs_lcd_send_byte205
+	GOTO       L_Inputs_lcd_send_byte204
 	BCF        PORTD+0, 2
-	GOTO       L_Inputs_lcd_send_byte206
-L_Inputs_lcd_send_byte205:
+	GOTO       L_Inputs_lcd_send_byte205
+L_Inputs_lcd_send_byte204:
 	BSF        PORTD+0, 2
-L_Inputs_lcd_send_byte206:
+L_Inputs_lcd_send_byte205:
 	MOVF       FARG_Inputs_lcd_send_byte_value+0, 0
 	MOVWF      FARG_Inputs_lcd_write_nibble_nibble+0
 	RRF        FARG_Inputs_lcd_write_nibble_nibble+0, 1
@@ -245,7 +245,7 @@ L_Inputs_buf_put_const_str16:
 	SUBWF      FARG_Inputs_buf_put_const_str_pos+0, 0
 	BTFSC      STATUS+0, 0
 	GOTO       L_Inputs_buf_put_const_str17
-L_Inputs_buf_put_const_str189:
+L_Inputs_buf_put_const_str188:
 	MOVF       FARG_Inputs_buf_put_const_str_pos+0, 0
 	ADDWF      FARG_Inputs_buf_put_const_str_buf+0, 0
 	MOVWF      R1+0
@@ -277,18 +277,18 @@ Inputs_buf_put_ulong:
 	MOVF       FARG_Inputs_buf_put_ulong_value+3, 0
 	SUBLW      0
 	BTFSS      STATUS+0, 2
-	GOTO       L_Inputs_buf_put_ulong211
+	GOTO       L_Inputs_buf_put_ulong210
 	MOVF       FARG_Inputs_buf_put_ulong_value+2, 0
 	SUBLW      0
 	BTFSS      STATUS+0, 2
-	GOTO       L_Inputs_buf_put_ulong211
+	GOTO       L_Inputs_buf_put_ulong210
 	MOVF       FARG_Inputs_buf_put_ulong_value+1, 0
 	SUBLW      253
 	BTFSS      STATUS+0, 2
-	GOTO       L_Inputs_buf_put_ulong211
+	GOTO       L_Inputs_buf_put_ulong210
 	MOVF       FARG_Inputs_buf_put_ulong_value+0, 0
 	SUBLW      232
-L_Inputs_buf_put_ulong211:
+L_Inputs_buf_put_ulong210:
 	BTFSC      STATUS+0, 0
 	GOTO       L_Inputs_buf_put_ulong20
 	MOVLW      232
@@ -309,10 +309,10 @@ L_Inputs_buf_put_ulong21:
 	MOVLW      39
 	SUBWF      R2+1, 0
 	BTFSS      STATUS+0, 2
-	GOTO       L_Inputs_buf_put_ulong212
+	GOTO       L_Inputs_buf_put_ulong211
 	MOVLW      16
 	SUBWF      R2+0, 0
-L_Inputs_buf_put_ulong212:
+L_Inputs_buf_put_ulong211:
 	BTFSS      STATUS+0, 0
 	GOTO       L_Inputs_buf_put_ulong22
 	MOVLW      16
@@ -350,10 +350,10 @@ L_Inputs_buf_put_ulong25:
 	MOVLW      3
 	SUBWF      R2+1, 0
 	BTFSS      STATUS+0, 2
-	GOTO       L_Inputs_buf_put_ulong213
+	GOTO       L_Inputs_buf_put_ulong212
 	MOVLW      232
 	SUBWF      R2+0, 0
-L_Inputs_buf_put_ulong213:
+L_Inputs_buf_put_ulong212:
 	BTFSS      STATUS+0, 0
 	GOTO       L_Inputs_buf_put_ulong26
 	MOVLW      232
@@ -368,12 +368,12 @@ L_Inputs_buf_put_ulong26:
 	MOVF       R1+0, 0
 	XORLW      0
 	BTFSS      STATUS+0, 2
-	GOTO       L_Inputs_buf_put_ulong192
+	GOTO       L_Inputs_buf_put_ulong191
 	MOVF       Inputs_buf_put_ulong_started_L0+0, 0
 	BTFSS      STATUS+0, 2
-	GOTO       L_Inputs_buf_put_ulong192
+	GOTO       L_Inputs_buf_put_ulong191
 	GOTO       L_Inputs_buf_put_ulong29
-L_Inputs_buf_put_ulong192:
+L_Inputs_buf_put_ulong191:
 	MOVLW      1
 	MOVWF      Inputs_buf_put_ulong_started_L0+0
 	MOVLW      16
@@ -396,10 +396,10 @@ L_Inputs_buf_put_ulong31:
 	MOVLW      0
 	SUBWF      R2+1, 0
 	BTFSS      STATUS+0, 2
-	GOTO       L_Inputs_buf_put_ulong214
+	GOTO       L_Inputs_buf_put_ulong213
 	MOVLW      100
 	SUBWF      R2+0, 0
-L_Inputs_buf_put_ulong214:
+L_Inputs_buf_put_ulong213:
 	BTFSS      STATUS+0, 0
 	GOTO       L_Inputs_buf_put_ulong32
 	MOVLW      100
@@ -412,12 +412,12 @@ L_Inputs_buf_put_ulong32:
 	MOVF       R1+0, 0
 	XORLW      0
 	BTFSS      STATUS+0, 2
-	GOTO       L_Inputs_buf_put_ulong191
+	GOTO       L_Inputs_buf_put_ulong190
 	MOVF       Inputs_buf_put_ulong_started_L0+0, 0
 	BTFSS      STATUS+0, 2
-	GOTO       L_Inputs_buf_put_ulong191
+	GOTO       L_Inputs_buf_put_ulong190
 	GOTO       L_Inputs_buf_put_ulong35
-L_Inputs_buf_put_ulong191:
+L_Inputs_buf_put_ulong190:
 	MOVLW      1
 	MOVWF      Inputs_buf_put_ulong_started_L0+0
 	MOVLW      16
@@ -440,10 +440,10 @@ L_Inputs_buf_put_ulong37:
 	MOVLW      0
 	SUBWF      R2+1, 0
 	BTFSS      STATUS+0, 2
-	GOTO       L_Inputs_buf_put_ulong215
+	GOTO       L_Inputs_buf_put_ulong214
 	MOVLW      10
 	SUBWF      R2+0, 0
-L_Inputs_buf_put_ulong215:
+L_Inputs_buf_put_ulong214:
 	BTFSS      STATUS+0, 0
 	GOTO       L_Inputs_buf_put_ulong38
 	MOVLW      10
@@ -456,12 +456,12 @@ L_Inputs_buf_put_ulong38:
 	MOVF       R1+0, 0
 	XORLW      0
 	BTFSS      STATUS+0, 2
-	GOTO       L_Inputs_buf_put_ulong190
+	GOTO       L_Inputs_buf_put_ulong189
 	MOVF       Inputs_buf_put_ulong_started_L0+0, 0
 	BTFSS      STATUS+0, 2
-	GOTO       L_Inputs_buf_put_ulong190
+	GOTO       L_Inputs_buf_put_ulong189
 	GOTO       L_Inputs_buf_put_ulong41
-L_Inputs_buf_put_ulong190:
+L_Inputs_buf_put_ulong189:
 	MOVLW      1
 	MOVWF      Inputs_buf_put_ulong_started_L0+0
 	MOVLW      16
@@ -775,10 +775,8 @@ L_end_lcd_flush_if_changed:
 
 Inputs_keypad_rows_idle:
 
-	BSF        PORTB+0, 3
-	BSF        PORTE+0, 0
-	BSF        PORTE+0, 1
-	BSF        PORTE+0, 2
+	MOVLW      255
+	MOVWF      PORTB+0
 L_end_keypad_rows_idle:
 	RETURN
 ; end of Inputs_keypad_rows_idle
@@ -796,30 +794,33 @@ L_Inputs_keypad_scan_raw68:
 	XORLW      0
 	BTFSS      STATUS+0, 2
 	GOTO       L_Inputs_keypad_scan_raw69
-L_Inputs_keypad_scan_raw193:
-	CALL       Inputs_keypad_rows_idle+0
+L_Inputs_keypad_scan_raw192:
 	MOVF       Inputs_keypad_scan_raw_row_L0+0, 0
 	XORLW      0
 	BTFSS      STATUS+0, 2
 	GOTO       L_Inputs_keypad_scan_raw73
-	BCF        PORTB+0, 3
+	MOVLW      239
+	MOVWF      PORTB+0
 	GOTO       L_Inputs_keypad_scan_raw74
 L_Inputs_keypad_scan_raw73:
 	MOVF       Inputs_keypad_scan_raw_row_L0+0, 0
 	XORLW      1
 	BTFSS      STATUS+0, 2
 	GOTO       L_Inputs_keypad_scan_raw75
-	BCF        PORTE+0, 0
+	MOVLW      223
+	MOVWF      PORTB+0
 	GOTO       L_Inputs_keypad_scan_raw76
 L_Inputs_keypad_scan_raw75:
 	MOVF       Inputs_keypad_scan_raw_row_L0+0, 0
 	XORLW      2
 	BTFSS      STATUS+0, 2
 	GOTO       L_Inputs_keypad_scan_raw77
-	BCF        PORTE+0, 1
+	MOVLW      191
+	MOVWF      PORTB+0
 	GOTO       L_Inputs_keypad_scan_raw78
 L_Inputs_keypad_scan_raw77:
-	BCF        PORTE+0, 2
+	MOVLW      127
+	MOVWF      PORTB+0
 L_Inputs_keypad_scan_raw78:
 L_Inputs_keypad_scan_raw76:
 L_Inputs_keypad_scan_raw74:
@@ -831,37 +832,50 @@ L_Inputs_keypad_scan_raw79:
 	BTFSC      PORTB+0, 0
 	GOTO       L_Inputs_keypad_scan_raw80
 	MOVF       Inputs_keypad_scan_raw_row_L0+0, 0
-	MOVWF      R0+0
-	MOVLW      3
-	MOVWF      R4+0
-	CALL       _Mul_8X8_U+0
-	INCF       R0+0, 0
 	MOVWF      Inputs_keypad_scan_raw_key_L0+0
+	RLF        Inputs_keypad_scan_raw_key_L0+0, 1
+	BCF        Inputs_keypad_scan_raw_key_L0+0, 0
+	RLF        Inputs_keypad_scan_raw_key_L0+0, 1
+	BCF        Inputs_keypad_scan_raw_key_L0+0, 0
+	INCF       Inputs_keypad_scan_raw_key_L0+0, 1
 	GOTO       L_Inputs_keypad_scan_raw81
 L_Inputs_keypad_scan_raw80:
 	BTFSC      PORTB+0, 1
 	GOTO       L_Inputs_keypad_scan_raw82
 	MOVF       Inputs_keypad_scan_raw_row_L0+0, 0
-	MOVWF      R0+0
-	MOVLW      3
-	MOVWF      R4+0
-	CALL       _Mul_8X8_U+0
-	MOVLW      2
-	ADDWF      R0+0, 0
 	MOVWF      Inputs_keypad_scan_raw_key_L0+0
+	RLF        Inputs_keypad_scan_raw_key_L0+0, 1
+	BCF        Inputs_keypad_scan_raw_key_L0+0, 0
+	RLF        Inputs_keypad_scan_raw_key_L0+0, 1
+	BCF        Inputs_keypad_scan_raw_key_L0+0, 0
+	MOVLW      2
+	ADDWF      Inputs_keypad_scan_raw_key_L0+0, 1
 	GOTO       L_Inputs_keypad_scan_raw83
 L_Inputs_keypad_scan_raw82:
 	BTFSC      PORTB+0, 2
 	GOTO       L_Inputs_keypad_scan_raw84
 	MOVF       Inputs_keypad_scan_raw_row_L0+0, 0
-	MOVWF      R0+0
-	MOVLW      3
-	MOVWF      R4+0
-	CALL       _Mul_8X8_U+0
-	MOVLW      3
-	ADDWF      R0+0, 0
 	MOVWF      Inputs_keypad_scan_raw_key_L0+0
+	RLF        Inputs_keypad_scan_raw_key_L0+0, 1
+	BCF        Inputs_keypad_scan_raw_key_L0+0, 0
+	RLF        Inputs_keypad_scan_raw_key_L0+0, 1
+	BCF        Inputs_keypad_scan_raw_key_L0+0, 0
+	MOVLW      3
+	ADDWF      Inputs_keypad_scan_raw_key_L0+0, 1
+	GOTO       L_Inputs_keypad_scan_raw85
 L_Inputs_keypad_scan_raw84:
+	BTFSC      PORTB+0, 3
+	GOTO       L_Inputs_keypad_scan_raw86
+	MOVF       Inputs_keypad_scan_raw_row_L0+0, 0
+	MOVWF      Inputs_keypad_scan_raw_key_L0+0
+	RLF        Inputs_keypad_scan_raw_key_L0+0, 1
+	BCF        Inputs_keypad_scan_raw_key_L0+0, 0
+	RLF        Inputs_keypad_scan_raw_key_L0+0, 1
+	BCF        Inputs_keypad_scan_raw_key_L0+0, 0
+	MOVLW      4
+	ADDWF      Inputs_keypad_scan_raw_key_L0+0, 1
+L_Inputs_keypad_scan_raw86:
+L_Inputs_keypad_scan_raw85:
 L_Inputs_keypad_scan_raw83:
 L_Inputs_keypad_scan_raw81:
 	INCF       Inputs_keypad_scan_raw_row_L0+0, 1
@@ -877,22 +891,22 @@ L_end_keypad_scan_raw:
 Inputs_landing_buttons_read_raw_mask:
 
 	CLRF       Inputs_landing_buttons_read_raw_mask_mask_L0+0
-	BTFSC      PORTA+0, 2
-	GOTO       L_Inputs_landing_buttons_read_raw_mask85
-	BSF        Inputs_landing_buttons_read_raw_mask_mask_L0+0, 0
-L_Inputs_landing_buttons_read_raw_mask85:
-	BTFSC      PORTA+0, 3
-	GOTO       L_Inputs_landing_buttons_read_raw_mask86
-	BSF        Inputs_landing_buttons_read_raw_mask_mask_L0+0, 1
-L_Inputs_landing_buttons_read_raw_mask86:
-	BTFSC      PORTA+0, 4
+	BTFSS      PORTA+0, 2
 	GOTO       L_Inputs_landing_buttons_read_raw_mask87
-	BSF        Inputs_landing_buttons_read_raw_mask_mask_L0+0, 2
+	BSF        Inputs_landing_buttons_read_raw_mask_mask_L0+0, 0
 L_Inputs_landing_buttons_read_raw_mask87:
-	BTFSC      PORTA+0, 5
+	BTFSS      PORTA+0, 3
 	GOTO       L_Inputs_landing_buttons_read_raw_mask88
-	BSF        Inputs_landing_buttons_read_raw_mask_mask_L0+0, 3
+	BSF        Inputs_landing_buttons_read_raw_mask_mask_L0+0, 1
 L_Inputs_landing_buttons_read_raw_mask88:
+	BTFSS      PORTA+0, 4
+	GOTO       L_Inputs_landing_buttons_read_raw_mask89
+	BSF        Inputs_landing_buttons_read_raw_mask_mask_L0+0, 2
+L_Inputs_landing_buttons_read_raw_mask89:
+	BTFSS      PORTA+0, 5
+	GOTO       L_Inputs_landing_buttons_read_raw_mask90
+	BSF        Inputs_landing_buttons_read_raw_mask_mask_L0+0, 3
+L_Inputs_landing_buttons_read_raw_mask90:
 	MOVF       Inputs_landing_buttons_read_raw_mask_mask_L0+0, 0
 	MOVWF      R0+0
 L_end_landing_buttons_read_raw_mask:
@@ -904,15 +918,15 @@ Inputs_request_queue_push:
 	MOVF       FARG_Inputs_request_queue_push_floor+0, 0
 	SUBLW      3
 	BTFSC      STATUS+0, 0
-	GOTO       L_Inputs_request_queue_push89
+	GOTO       L_Inputs_request_queue_push91
 	GOTO       L_end_request_queue_push
-L_Inputs_request_queue_push89:
+L_Inputs_request_queue_push91:
 	MOVLW      8
 	SUBWF      Inputs_req_count+0, 0
 	BTFSS      STATUS+0, 0
-	GOTO       L_Inputs_request_queue_push90
+	GOTO       L_Inputs_request_queue_push92
 	GOTO       L_end_request_queue_push
-L_Inputs_request_queue_push90:
+L_Inputs_request_queue_push92:
 	MOVF       Inputs_req_tail+0, 0
 	ADDLW      Inputs_req_queue+0
 	MOVWF      FSR
@@ -922,9 +936,9 @@ L_Inputs_request_queue_push90:
 	MOVLW      8
 	SUBWF      Inputs_req_tail+0, 0
 	BTFSS      STATUS+0, 0
-	GOTO       L_Inputs_request_queue_push91
+	GOTO       L_Inputs_request_queue_push93
 	CLRF       Inputs_req_tail+0
-L_Inputs_request_queue_push91:
+L_Inputs_request_queue_push93:
 	INCF       Inputs_req_count+0, 1
 L_end_request_queue_push:
 	RETURN
@@ -932,62 +946,47 @@ L_end_request_queue_push:
 
 Inputs_handle_debounced_keypad:
 
-	GOTO       L_Inputs_handle_debounced_keypad92
-L_Inputs_handle_debounced_keypad94:
+	GOTO       L_Inputs_handle_debounced_keypad94
+L_Inputs_handle_debounced_keypad96:
 	CLRF       FARG_Inputs_request_queue_push_floor+0
 	CALL       Inputs_request_queue_push+0
-	GOTO       L_Inputs_handle_debounced_keypad93
-L_Inputs_handle_debounced_keypad95:
-L_Inputs_handle_debounced_keypad96:
+	GOTO       L_Inputs_handle_debounced_keypad95
+L_Inputs_handle_debounced_keypad97:
 	MOVLW      1
 	MOVWF      FARG_Inputs_request_queue_push_floor+0
 	CALL       Inputs_request_queue_push+0
-	GOTO       L_Inputs_handle_debounced_keypad93
-L_Inputs_handle_debounced_keypad97:
+	GOTO       L_Inputs_handle_debounced_keypad95
 L_Inputs_handle_debounced_keypad98:
 	MOVLW      2
 	MOVWF      FARG_Inputs_request_queue_push_floor+0
 	CALL       Inputs_request_queue_push+0
-	GOTO       L_Inputs_handle_debounced_keypad93
+	GOTO       L_Inputs_handle_debounced_keypad95
 L_Inputs_handle_debounced_keypad99:
-L_Inputs_handle_debounced_keypad100:
 	MOVLW      3
 	MOVWF      FARG_Inputs_request_queue_push_floor+0
 	CALL       Inputs_request_queue_push+0
-	GOTO       L_Inputs_handle_debounced_keypad93
-L_Inputs_handle_debounced_keypad101:
-	GOTO       L_Inputs_handle_debounced_keypad93
-L_Inputs_handle_debounced_keypad92:
-	MOVF       FARG_Inputs_handle_debounced_keypad_key+0, 0
-	XORLW      11
-	BTFSC      STATUS+0, 2
-	GOTO       L_Inputs_handle_debounced_keypad94
-	MOVF       FARG_Inputs_handle_debounced_keypad_key+0, 0
-	XORLW      1
-	BTFSC      STATUS+0, 2
 	GOTO       L_Inputs_handle_debounced_keypad95
+L_Inputs_handle_debounced_keypad100:
+	GOTO       L_Inputs_handle_debounced_keypad95
+L_Inputs_handle_debounced_keypad94:
 	MOVF       FARG_Inputs_handle_debounced_keypad_key+0, 0
-	XORLW      4
+	XORLW      14
 	BTFSC      STATUS+0, 2
 	GOTO       L_Inputs_handle_debounced_keypad96
 	MOVF       FARG_Inputs_handle_debounced_keypad_key+0, 0
-	XORLW      2
+	XORLW      9
 	BTFSC      STATUS+0, 2
 	GOTO       L_Inputs_handle_debounced_keypad97
 	MOVF       FARG_Inputs_handle_debounced_keypad_key+0, 0
-	XORLW      5
+	XORLW      10
 	BTFSC      STATUS+0, 2
 	GOTO       L_Inputs_handle_debounced_keypad98
 	MOVF       FARG_Inputs_handle_debounced_keypad_key+0, 0
-	XORLW      3
+	XORLW      11
 	BTFSC      STATUS+0, 2
 	GOTO       L_Inputs_handle_debounced_keypad99
-	MOVF       FARG_Inputs_handle_debounced_keypad_key+0, 0
-	XORLW      6
-	BTFSC      STATUS+0, 2
 	GOTO       L_Inputs_handle_debounced_keypad100
-	GOTO       L_Inputs_handle_debounced_keypad101
-L_Inputs_handle_debounced_keypad93:
+L_Inputs_handle_debounced_keypad95:
 L_end_handle_debounced_keypad:
 	RETURN
 ; end of Inputs_handle_debounced_keypad
@@ -995,22 +994,22 @@ L_end_handle_debounced_keypad:
 Inputs_hall_read_raw_mask:
 
 	CLRF       Inputs_hall_read_raw_mask_mask_L0+0
-	BTFSC      PORTC+0, 3
-	GOTO       L_Inputs_hall_read_raw_mask102
+	BTFSS      PORTC+0, 3
+	GOTO       L_Inputs_hall_read_raw_mask101
 	BSF        Inputs_hall_read_raw_mask_mask_L0+0, 0
-L_Inputs_hall_read_raw_mask102:
-	BTFSC      PORTC+0, 4
-	GOTO       L_Inputs_hall_read_raw_mask103
+L_Inputs_hall_read_raw_mask101:
+	BTFSS      PORTC+0, 4
+	GOTO       L_Inputs_hall_read_raw_mask102
 	BSF        Inputs_hall_read_raw_mask_mask_L0+0, 1
-L_Inputs_hall_read_raw_mask103:
-	BTFSC      PORTC+0, 5
-	GOTO       L_Inputs_hall_read_raw_mask104
+L_Inputs_hall_read_raw_mask102:
+	BTFSS      PORTC+0, 5
+	GOTO       L_Inputs_hall_read_raw_mask103
 	BSF        Inputs_hall_read_raw_mask_mask_L0+0, 2
-L_Inputs_hall_read_raw_mask104:
-	BTFSC      PORTC+0, 6
-	GOTO       L_Inputs_hall_read_raw_mask105
+L_Inputs_hall_read_raw_mask103:
+	BTFSS      PORTC+0, 6
+	GOTO       L_Inputs_hall_read_raw_mask104
 	BSF        Inputs_hall_read_raw_mask_mask_L0+0, 3
-L_Inputs_hall_read_raw_mask105:
+L_Inputs_hall_read_raw_mask104:
 	MOVF       Inputs_hall_read_raw_mask_mask_L0+0, 0
 	MOVWF      R0+0
 L_end_hall_read_raw_mask:
@@ -1021,117 +1020,117 @@ Inputs_buzzer_service_tick:
 
 	CLRF       Inputs_buzzer_service_tick_output_on_L0+0
 	CLRF       Inputs_buzzer_service_tick_period_L0+0
-	GOTO       L_Inputs_buzzer_service_tick106
-L_Inputs_buzzer_service_tick108:
+	GOTO       L_Inputs_buzzer_service_tick105
+L_Inputs_buzzer_service_tick107:
 	MOVLW      15
 	SUBWF      Inputs_bz_tick_cnt+0, 0
 	BTFSC      STATUS+0, 0
-	GOTO       L_Inputs_buzzer_service_tick109
+	GOTO       L_Inputs_buzzer_service_tick108
 	MOVLW      1
 	MOVWF      Inputs_buzzer_service_tick_output_on_L0+0
-	GOTO       L_Inputs_buzzer_service_tick110
-L_Inputs_buzzer_service_tick109:
+	GOTO       L_Inputs_buzzer_service_tick109
+L_Inputs_buzzer_service_tick108:
 	CLRF       Inputs_bz_active_event+0
+L_Inputs_buzzer_service_tick109:
+	GOTO       L_Inputs_buzzer_service_tick106
 L_Inputs_buzzer_service_tick110:
-	GOTO       L_Inputs_buzzer_service_tick107
-L_Inputs_buzzer_service_tick111:
 	MOVLW      10
 	SUBWF      Inputs_bz_tick_cnt+0, 0
 	BTFSC      STATUS+0, 0
-	GOTO       L_Inputs_buzzer_service_tick112
+	GOTO       L_Inputs_buzzer_service_tick111
 	MOVLW      1
 	MOVWF      Inputs_buzzer_service_tick_output_on_L0+0
-	GOTO       L_Inputs_buzzer_service_tick113
-L_Inputs_buzzer_service_tick112:
+	GOTO       L_Inputs_buzzer_service_tick112
+L_Inputs_buzzer_service_tick111:
 	CLRF       Inputs_bz_active_event+0
+L_Inputs_buzzer_service_tick112:
+	GOTO       L_Inputs_buzzer_service_tick106
 L_Inputs_buzzer_service_tick113:
-	GOTO       L_Inputs_buzzer_service_tick107
-L_Inputs_buzzer_service_tick114:
 	MOVLW      20
 	MOVWF      Inputs_buzzer_service_tick_period_L0+0
 	MOVLW      10
 	SUBWF      Inputs_bz_tick_cnt+0, 0
 	BTFSC      STATUS+0, 0
-	GOTO       L_Inputs_buzzer_service_tick115
+	GOTO       L_Inputs_buzzer_service_tick114
 	MOVLW      1
 	MOVWF      R1+0
-	GOTO       L_Inputs_buzzer_service_tick116
-L_Inputs_buzzer_service_tick115:
+	GOTO       L_Inputs_buzzer_service_tick115
+L_Inputs_buzzer_service_tick114:
 	CLRF       R1+0
-L_Inputs_buzzer_service_tick116:
+L_Inputs_buzzer_service_tick115:
 	MOVF       R1+0, 0
 	MOVWF      Inputs_buzzer_service_tick_output_on_L0+0
-	GOTO       L_Inputs_buzzer_service_tick107
-L_Inputs_buzzer_service_tick117:
+	GOTO       L_Inputs_buzzer_service_tick106
+L_Inputs_buzzer_service_tick116:
 	MOVLW      60
 	MOVWF      Inputs_buzzer_service_tick_period_L0+0
 	MOVLW      25
 	SUBWF      Inputs_bz_tick_cnt+0, 0
 	BTFSS      STATUS+0, 0
-	GOTO       L_Inputs_buzzer_service_tick195
+	GOTO       L_Inputs_buzzer_service_tick194
 	MOVLW      35
 	SUBWF      Inputs_bz_tick_cnt+0, 0
 	BTFSS      STATUS+0, 0
-	GOTO       L_Inputs_buzzer_service_tick196
+	GOTO       L_Inputs_buzzer_service_tick195
 	MOVLW      45
 	SUBWF      Inputs_bz_tick_cnt+0, 0
 	BTFSC      STATUS+0, 0
-	GOTO       L_Inputs_buzzer_service_tick196
 	GOTO       L_Inputs_buzzer_service_tick195
-L_Inputs_buzzer_service_tick196:
-	GOTO       L_Inputs_buzzer_service_tick122
+	GOTO       L_Inputs_buzzer_service_tick194
 L_Inputs_buzzer_service_tick195:
+	GOTO       L_Inputs_buzzer_service_tick121
+L_Inputs_buzzer_service_tick194:
 	MOVLW      1
 	MOVWF      Inputs_buzzer_service_tick_output_on_L0+0
+L_Inputs_buzzer_service_tick121:
+	GOTO       L_Inputs_buzzer_service_tick106
 L_Inputs_buzzer_service_tick122:
-	GOTO       L_Inputs_buzzer_service_tick107
-L_Inputs_buzzer_service_tick123:
 	CLRF       Inputs_bz_active_event+0
 	CLRF       Inputs_buzzer_service_tick_output_on_L0+0
-	GOTO       L_Inputs_buzzer_service_tick107
-L_Inputs_buzzer_service_tick106:
+	GOTO       L_Inputs_buzzer_service_tick106
+L_Inputs_buzzer_service_tick105:
 	MOVF       Inputs_bz_active_event+0, 0
 	XORLW      1
 	BTFSC      STATUS+0, 2
-	GOTO       L_Inputs_buzzer_service_tick108
+	GOTO       L_Inputs_buzzer_service_tick107
 	MOVF       Inputs_bz_active_event+0, 0
 	XORLW      4
 	BTFSC      STATUS+0, 2
-	GOTO       L_Inputs_buzzer_service_tick111
+	GOTO       L_Inputs_buzzer_service_tick110
 	MOVF       Inputs_bz_active_event+0, 0
 	XORLW      2
 	BTFSC      STATUS+0, 2
-	GOTO       L_Inputs_buzzer_service_tick114
+	GOTO       L_Inputs_buzzer_service_tick113
 	MOVF       Inputs_bz_active_event+0, 0
 	XORLW      3
 	BTFSC      STATUS+0, 2
-	GOTO       L_Inputs_buzzer_service_tick117
-	GOTO       L_Inputs_buzzer_service_tick123
-L_Inputs_buzzer_service_tick107:
+	GOTO       L_Inputs_buzzer_service_tick116
+	GOTO       L_Inputs_buzzer_service_tick122
+L_Inputs_buzzer_service_tick106:
 	MOVF       Inputs_bz_active_event+0, 0
 	XORLW      0
 	BTFSC      STATUS+0, 2
-	GOTO       L_Inputs_buzzer_service_tick124
+	GOTO       L_Inputs_buzzer_service_tick123
 	INCF       Inputs_bz_tick_cnt+0, 1
 	MOVF       Inputs_buzzer_service_tick_period_L0+0, 0
 	XORLW      0
 	BTFSC      STATUS+0, 2
-	GOTO       L_Inputs_buzzer_service_tick127
+	GOTO       L_Inputs_buzzer_service_tick126
 	MOVF       Inputs_buzzer_service_tick_period_L0+0, 0
 	SUBWF      Inputs_bz_tick_cnt+0, 0
 	BTFSS      STATUS+0, 0
-	GOTO       L_Inputs_buzzer_service_tick127
-L_Inputs_buzzer_service_tick194:
+	GOTO       L_Inputs_buzzer_service_tick126
+L_Inputs_buzzer_service_tick193:
 	CLRF       Inputs_bz_tick_cnt+0
-L_Inputs_buzzer_service_tick127:
-L_Inputs_buzzer_service_tick124:
+L_Inputs_buzzer_service_tick126:
+L_Inputs_buzzer_service_tick123:
 	BTFSC      Inputs_buzzer_service_tick_output_on_L0+0, 0
-	GOTO       L_Inputs_buzzer_service_tick227
+	GOTO       L_Inputs_buzzer_service_tick226
 	BCF        PORTC+0, 7
-	GOTO       L_Inputs_buzzer_service_tick228
-L_Inputs_buzzer_service_tick227:
+	GOTO       L_Inputs_buzzer_service_tick227
+L_Inputs_buzzer_service_tick226:
 	BSF        PORTC+0, 7
-L_Inputs_buzzer_service_tick228:
+L_Inputs_buzzer_service_tick227:
 L_end_buzzer_service_tick:
 	RETURN
 ; end of Inputs_buzzer_service_tick
@@ -1144,13 +1143,14 @@ _Inputs_Init:
 	MOVWF      CMCON+0
 	BCF        TRISE+0, 4
 	BCF        OPTION_REG+0, 7
-	BCF        TRISB+0, 3
-	BCF        TRISE+0, 0
-	BCF        TRISE+0, 1
-	BCF        TRISE+0, 2
+	BCF        TRISB+0, 4
+	BCF        TRISB+0, 5
+	BCF        TRISB+0, 6
+	BCF        TRISB+0, 7
 	BSF        TRISB+0, 0
 	BSF        TRISB+0, 1
 	BSF        TRISB+0, 2
+	BSF        TRISB+0, 3
 	CALL       Inputs_keypad_rows_idle+0
 	BSF        TRISA+0, 2
 	BSF        TRISA+0, 3
@@ -1183,11 +1183,11 @@ _Inputs_Init:
 	CLRF       Inputs_bz_tick_cnt+0
 	CALL       Inputs_lcd_hw_init+0
 	CLRF       Inputs_Init_pos_L0+0
-L_Inputs_Init128:
+L_Inputs_Init127:
 	MOVLW      17
 	SUBWF      Inputs_Init_pos_L0+0, 0
 	BTFSC      STATUS+0, 0
-	GOTO       L_Inputs_Init129
+	GOTO       L_Inputs_Init128
 	MOVF       Inputs_Init_pos_L0+0, 0
 	ADDLW      Inputs_lcd_cache+0
 	MOVWF      FSR
@@ -1197,8 +1197,8 @@ L_Inputs_Init128:
 	MOVWF      FSR
 	CLRF       INDF+0
 	INCF       Inputs_Init_pos_L0+0, 1
-	GOTO       L_Inputs_Init128
-L_Inputs_Init129:
+	GOTO       L_Inputs_Init127
+L_Inputs_Init128:
 	MOVLW      Inputs_lcd_line_buf+0
 	MOVWF      FARG_Inputs_buf_put_const_str_buf+0
 	CLRF       FARG_Inputs_buf_put_const_str_pos+0
@@ -1250,53 +1250,53 @@ _Inputs_Update:
 	MOVF       R0+0, 0
 	XORWF      Inputs_kp_last_key+0, 0
 	BTFSC      STATUS+0, 2
-	GOTO       L_Inputs_Update131
+	GOTO       L_Inputs_Update130
 	MOVF       Inputs_Update_raw_key_L0+0, 0
 	MOVWF      Inputs_kp_last_key+0
 	CLRF       Inputs_kp_stable_cnt+0
-	GOTO       L_Inputs_Update132
-L_Inputs_Update131:
+	GOTO       L_Inputs_Update131
+L_Inputs_Update130:
 	MOVLW      2
 	SUBWF      Inputs_kp_stable_cnt+0, 0
 	BTFSC      STATUS+0, 0
-	GOTO       L_Inputs_Update133
+	GOTO       L_Inputs_Update132
 	INCF       Inputs_kp_stable_cnt+0, 1
 	MOVF       Inputs_kp_stable_cnt+0, 0
 	XORLW      2
 	BTFSS      STATUS+0, 2
-	GOTO       L_Inputs_Update136
+	GOTO       L_Inputs_Update135
 	MOVF       Inputs_Update_raw_key_L0+0, 0
 	XORLW      0
 	BTFSC      STATUS+0, 2
-	GOTO       L_Inputs_Update136
-L__Inputs_Update197:
+	GOTO       L_Inputs_Update135
+L__Inputs_Update196:
 	MOVF       Inputs_Update_raw_key_L0+0, 0
 	MOVWF      FARG_Inputs_handle_debounced_keypad_key+0
 	CALL       Inputs_handle_debounced_keypad+0
-L_Inputs_Update136:
-L_Inputs_Update133:
+L_Inputs_Update135:
 L_Inputs_Update132:
+L_Inputs_Update131:
 	CALL       Inputs_landing_buttons_read_raw_mask+0
 	MOVF       R0+0, 0
 	MOVWF      Inputs_Update_raw_btn_L0+0
 	MOVF       R0+0, 0
 	XORWF      Inputs_btn_last_mask+0, 0
 	BTFSC      STATUS+0, 2
-	GOTO       L_Inputs_Update137
+	GOTO       L_Inputs_Update136
 	MOVF       Inputs_Update_raw_btn_L0+0, 0
 	MOVWF      Inputs_btn_last_mask+0
 	CLRF       Inputs_btn_stable_cnt+0
-	GOTO       L_Inputs_Update138
-L_Inputs_Update137:
+	GOTO       L_Inputs_Update137
+L_Inputs_Update136:
 	MOVLW      2
 	SUBWF      Inputs_btn_stable_cnt+0, 0
 	BTFSC      STATUS+0, 0
-	GOTO       L_Inputs_Update139
+	GOTO       L_Inputs_Update138
 	INCF       Inputs_btn_stable_cnt+0, 1
 	MOVF       Inputs_btn_stable_cnt+0, 0
 	XORLW      2
 	BTFSS      STATUS+0, 2
-	GOTO       L_Inputs_Update140
+	GOTO       L_Inputs_Update139
 	COMF       Inputs_btn_stable_mask+0, 0
 	MOVWF      R0+0
 	MOVF       R0+0, 0
@@ -1307,57 +1307,57 @@ L_Inputs_Update137:
 	MOVF       Inputs_Update_raw_btn_L0+0, 0
 	MOVWF      Inputs_btn_stable_mask+0
 	BTFSS      R1+0, 0
-	GOTO       L_Inputs_Update141
+	GOTO       L_Inputs_Update140
 	CLRF       FARG_Inputs_request_queue_push_floor+0
 	CALL       Inputs_request_queue_push+0
-L_Inputs_Update141:
+L_Inputs_Update140:
 	BTFSS      Inputs_Update_pressed_edges_L0+0, 1
-	GOTO       L_Inputs_Update142
+	GOTO       L_Inputs_Update141
 	MOVLW      1
 	MOVWF      FARG_Inputs_request_queue_push_floor+0
 	CALL       Inputs_request_queue_push+0
-L_Inputs_Update142:
+L_Inputs_Update141:
 	BTFSS      Inputs_Update_pressed_edges_L0+0, 2
-	GOTO       L_Inputs_Update143
+	GOTO       L_Inputs_Update142
 	MOVLW      2
 	MOVWF      FARG_Inputs_request_queue_push_floor+0
 	CALL       Inputs_request_queue_push+0
-L_Inputs_Update143:
+L_Inputs_Update142:
 	BTFSS      Inputs_Update_pressed_edges_L0+0, 3
-	GOTO       L_Inputs_Update144
+	GOTO       L_Inputs_Update143
 	MOVLW      3
 	MOVWF      FARG_Inputs_request_queue_push_floor+0
 	CALL       Inputs_request_queue_push+0
-L_Inputs_Update144:
-L_Inputs_Update140:
+L_Inputs_Update143:
 L_Inputs_Update139:
 L_Inputs_Update138:
+L_Inputs_Update137:
 	CALL       Inputs_hall_read_raw_mask+0
 	MOVF       R0+0, 0
 	MOVWF      Inputs_Update_raw_hall_L0+0
 	MOVF       R0+0, 0
 	XORWF      Inputs_hall_last_raw+0, 0
 	BTFSC      STATUS+0, 2
-	GOTO       L_Inputs_Update145
+	GOTO       L_Inputs_Update144
 	MOVF       Inputs_Update_raw_hall_L0+0, 0
 	MOVWF      Inputs_hall_last_raw+0
 	CLRF       Inputs_hall_stable_cnt+0
-	GOTO       L_Inputs_Update146
-L_Inputs_Update145:
+	GOTO       L_Inputs_Update145
+L_Inputs_Update144:
 	MOVLW      2
 	SUBWF      Inputs_hall_stable_cnt+0, 0
 	BTFSC      STATUS+0, 0
-	GOTO       L_Inputs_Update147
+	GOTO       L_Inputs_Update146
 	INCF       Inputs_hall_stable_cnt+0, 1
 	MOVF       Inputs_hall_stable_cnt+0, 0
 	XORLW      2
 	BTFSS      STATUS+0, 2
-	GOTO       L_Inputs_Update148
+	GOTO       L_Inputs_Update147
 	MOVF       Inputs_Update_raw_hall_L0+0, 0
 	MOVWF      Inputs_hall_stable_mask+0
-L_Inputs_Update148:
 L_Inputs_Update147:
 L_Inputs_Update146:
+L_Inputs_Update145:
 	CALL       Inputs_buzzer_service_tick+0
 L_end_Inputs_Update:
 	RETURN
@@ -1368,16 +1368,16 @@ _Inputs_GetNewFloorRequest:
 	MOVF       FARG_Inputs_GetNewFloorRequest_floor+0, 0
 	XORLW      0
 	BTFSC      STATUS+0, 2
-	GOTO       L__Inputs_GetNewFloorRequest198
+	GOTO       L__Inputs_GetNewFloorRequest197
 	MOVF       Inputs_req_count+0, 0
 	XORLW      0
 	BTFSC      STATUS+0, 2
-	GOTO       L__Inputs_GetNewFloorRequest198
-	GOTO       L_Inputs_GetNewFloorRequest151
-L__Inputs_GetNewFloorRequest198:
+	GOTO       L__Inputs_GetNewFloorRequest197
+	GOTO       L_Inputs_GetNewFloorRequest150
+L__Inputs_GetNewFloorRequest197:
 	CLRF       R0+0
 	GOTO       L_end_Inputs_GetNewFloorRequest
-L_Inputs_GetNewFloorRequest151:
+L_Inputs_GetNewFloorRequest150:
 	MOVF       Inputs_req_head+0, 0
 	ADDLW      Inputs_req_queue+0
 	MOVWF      FSR
@@ -1391,9 +1391,9 @@ L_Inputs_GetNewFloorRequest151:
 	MOVLW      8
 	SUBWF      Inputs_req_head+0, 0
 	BTFSS      STATUS+0, 0
-	GOTO       L_Inputs_GetNewFloorRequest152
+	GOTO       L_Inputs_GetNewFloorRequest151
 	CLRF       Inputs_req_head+0
-L_Inputs_GetNewFloorRequest152:
+L_Inputs_GetNewFloorRequest151:
 	DECF       Inputs_req_count+0, 1
 	MOVLW      1
 	MOVWF      R0+0
@@ -1403,44 +1403,44 @@ L_end_Inputs_GetNewFloorRequest:
 
 _Inputs_GetCurrentFloor:
 
-	GOTO       L_Inputs_GetCurrentFloor153
-L_Inputs_GetCurrentFloor155:
+	GOTO       L_Inputs_GetCurrentFloor152
+L_Inputs_GetCurrentFloor154:
 	CLRF       R0+0
 	GOTO       L_end_Inputs_GetCurrentFloor
-L_Inputs_GetCurrentFloor156:
+L_Inputs_GetCurrentFloor155:
 	MOVLW      1
 	MOVWF      R0+0
 	GOTO       L_end_Inputs_GetCurrentFloor
-L_Inputs_GetCurrentFloor157:
+L_Inputs_GetCurrentFloor156:
 	MOVLW      2
 	MOVWF      R0+0
 	GOTO       L_end_Inputs_GetCurrentFloor
-L_Inputs_GetCurrentFloor158:
+L_Inputs_GetCurrentFloor157:
 	MOVLW      3
 	MOVWF      R0+0
 	GOTO       L_end_Inputs_GetCurrentFloor
-L_Inputs_GetCurrentFloor159:
+L_Inputs_GetCurrentFloor158:
 	MOVLW      255
 	MOVWF      R0+0
 	GOTO       L_end_Inputs_GetCurrentFloor
-L_Inputs_GetCurrentFloor153:
+L_Inputs_GetCurrentFloor152:
 	MOVF       Inputs_hall_stable_mask+0, 0
 	XORLW      1
 	BTFSC      STATUS+0, 2
-	GOTO       L_Inputs_GetCurrentFloor155
+	GOTO       L_Inputs_GetCurrentFloor154
 	MOVF       Inputs_hall_stable_mask+0, 0
 	XORLW      2
 	BTFSC      STATUS+0, 2
-	GOTO       L_Inputs_GetCurrentFloor156
+	GOTO       L_Inputs_GetCurrentFloor155
 	MOVF       Inputs_hall_stable_mask+0, 0
 	XORLW      4
 	BTFSC      STATUS+0, 2
-	GOTO       L_Inputs_GetCurrentFloor157
+	GOTO       L_Inputs_GetCurrentFloor156
 	MOVF       Inputs_hall_stable_mask+0, 0
 	XORLW      8
 	BTFSC      STATUS+0, 2
+	GOTO       L_Inputs_GetCurrentFloor157
 	GOTO       L_Inputs_GetCurrentFloor158
-	GOTO       L_Inputs_GetCurrentFloor159
 L_end_Inputs_GetCurrentFloor:
 	RETURN
 ; end of _Inputs_GetCurrentFloor
@@ -1455,13 +1455,13 @@ _Inputs_IsFloorSensorFault:
 	MOVF       R1+0, 0
 	XORLW      0
 	BTFSC      STATUS+0, 2
-	GOTO       L_Inputs_IsFloorSensorFault160
+	GOTO       L_Inputs_IsFloorSensorFault159
 	MOVLW      1
 	MOVWF      R2+0
-	GOTO       L_Inputs_IsFloorSensorFault161
-L_Inputs_IsFloorSensorFault160:
+	GOTO       L_Inputs_IsFloorSensorFault160
+L_Inputs_IsFloorSensorFault159:
 	CLRF       R2+0
-L_Inputs_IsFloorSensorFault161:
+L_Inputs_IsFloorSensorFault160:
 	MOVF       R2+0, 0
 	MOVWF      R0+0
 L_end_Inputs_IsFloorSensorFault:
@@ -1473,29 +1473,29 @@ _Inputs_DisplayStatus:
 	MOVF       Inputs_bz_active_event+0, 0
 	XORLW      2
 	BTFSS      STATUS+0, 2
-	GOTO       L_Inputs_DisplayStatus164
+	GOTO       L_Inputs_DisplayStatus163
 	MOVF       FARG_Inputs_DisplayStatus_controller_state+0, 0
 	XORLW      7
 	BTFSC      STATUS+0, 2
-	GOTO       L_Inputs_DisplayStatus164
-L__Inputs_DisplayStatus201:
-	CLRF       Inputs_bz_active_event+0
-	BCF        PORTC+0, 7
-	GOTO       L_Inputs_DisplayStatus165
-L_Inputs_DisplayStatus164:
-	MOVF       Inputs_bz_active_event+0, 0
-	XORLW      3
-	BTFSS      STATUS+0, 2
-	GOTO       L_Inputs_DisplayStatus168
-	MOVF       FARG_Inputs_DisplayStatus_controller_state+0, 0
-	XORLW      8
-	BTFSC      STATUS+0, 2
-	GOTO       L_Inputs_DisplayStatus168
+	GOTO       L_Inputs_DisplayStatus163
 L__Inputs_DisplayStatus200:
 	CLRF       Inputs_bz_active_event+0
 	BCF        PORTC+0, 7
-L_Inputs_DisplayStatus168:
-L_Inputs_DisplayStatus165:
+	GOTO       L_Inputs_DisplayStatus164
+L_Inputs_DisplayStatus163:
+	MOVF       Inputs_bz_active_event+0, 0
+	XORLW      3
+	BTFSS      STATUS+0, 2
+	GOTO       L_Inputs_DisplayStatus167
+	MOVF       FARG_Inputs_DisplayStatus_controller_state+0, 0
+	XORLW      8
+	BTFSC      STATUS+0, 2
+	GOTO       L_Inputs_DisplayStatus167
+L__Inputs_DisplayStatus199:
+	CLRF       Inputs_bz_active_event+0
+	BCF        PORTC+0, 7
+L_Inputs_DisplayStatus167:
+L_Inputs_DisplayStatus164:
 	CLRF       Inputs_DisplayStatus_pos_L0+0
 	MOVF       Inputs_DisplayStatus_pos_L0+0, 0
 	ADDLW      Inputs_lcd_line_buf+0
@@ -1567,14 +1567,14 @@ L_Inputs_DisplayStatus165:
 	MOVLW      16
 	SUBWF      R0+0, 0
 	BTFSC      STATUS+0, 0
-	GOTO       L_Inputs_DisplayStatus169
+	GOTO       L_Inputs_DisplayStatus168
 	MOVF       Inputs_DisplayStatus_pos_L0+0, 0
 	ADDLW      Inputs_lcd_line_buf+0
 	MOVWF      FSR
 	MOVLW      93
 	MOVWF      INDF+0
 	INCF       Inputs_DisplayStatus_pos_L0+0, 1
-L_Inputs_DisplayStatus169:
+L_Inputs_DisplayStatus168:
 	MOVLW      Inputs_lcd_line_buf+0
 	MOVWF      FARG_Inputs_buf_pad_line_buf+0
 	MOVF       Inputs_DisplayStatus_pos_L0+0, 0
@@ -1610,48 +1610,48 @@ L_Inputs_DisplayStatus169:
 	MOVLW      16
 	SUBWF      R0+0, 0
 	BTFSC      STATUS+0, 0
-	GOTO       L_Inputs_DisplayStatus170
+	GOTO       L_Inputs_DisplayStatus169
 	MOVF       Inputs_DisplayStatus_pos_L0+0, 0
 	ADDLW      Inputs_lcd_line_buf+0
 	MOVWF      FSR
 	MOVLW      103
 	MOVWF      INDF+0
 	INCF       Inputs_DisplayStatus_pos_L0+0, 1
-L_Inputs_DisplayStatus170:
+L_Inputs_DisplayStatus169:
 	MOVLW      16
 	SUBWF      Inputs_DisplayStatus_pos_L0+0, 0
 	BTFSC      STATUS+0, 0
-	GOTO       L_Inputs_DisplayStatus171
+	GOTO       L_Inputs_DisplayStatus170
 	MOVF       Inputs_DisplayStatus_pos_L0+0, 0
 	ADDLW      Inputs_lcd_line_buf+0
 	MOVWF      FSR
 	MOVLW      32
 	MOVWF      INDF+0
 	INCF       Inputs_DisplayStatus_pos_L0+0, 1
-L_Inputs_DisplayStatus171:
+L_Inputs_DisplayStatus170:
 	MOVF       FARG_Inputs_DisplayStatus_weight_grams+3, 0
 	SUBLW      0
 	BTFSS      STATUS+0, 2
-	GOTO       L__Inputs_DisplayStatus235
+	GOTO       L__Inputs_DisplayStatus234
 	MOVF       FARG_Inputs_DisplayStatus_weight_grams+2, 0
 	SUBLW      0
 	BTFSS      STATUS+0, 2
-	GOTO       L__Inputs_DisplayStatus235
+	GOTO       L__Inputs_DisplayStatus234
 	MOVF       FARG_Inputs_DisplayStatus_weight_grams+1, 0
 	SUBLW      5
 	BTFSS      STATUS+0, 2
-	GOTO       L__Inputs_DisplayStatus235
+	GOTO       L__Inputs_DisplayStatus234
 	MOVF       FARG_Inputs_DisplayStatus_weight_grams+0, 0
 	SUBLW      220
-L__Inputs_DisplayStatus235:
+L__Inputs_DisplayStatus234:
 	BTFSS      STATUS+0, 0
-	GOTO       L__Inputs_DisplayStatus199
+	GOTO       L__Inputs_DisplayStatus198
 	MOVF       FARG_Inputs_DisplayStatus_controller_state+0, 0
 	XORLW      7
 	BTFSC      STATUS+0, 2
-	GOTO       L__Inputs_DisplayStatus199
-	GOTO       L_Inputs_DisplayStatus174
-L__Inputs_DisplayStatus199:
+	GOTO       L__Inputs_DisplayStatus198
+	GOTO       L_Inputs_DisplayStatus173
+L__Inputs_DisplayStatus198:
 	MOVLW      Inputs_lcd_line_buf+0
 	MOVWF      FARG_Inputs_buf_put_const_str_buf+0
 	MOVF       Inputs_DisplayStatus_pos_L0+0, 0
@@ -1663,8 +1663,8 @@ L__Inputs_DisplayStatus199:
 	CALL       Inputs_buf_put_const_str+0
 	MOVF       R0+0, 0
 	MOVWF      Inputs_DisplayStatus_pos_L0+0
-	GOTO       L_Inputs_DisplayStatus175
-L_Inputs_DisplayStatus174:
+	GOTO       L_Inputs_DisplayStatus174
+L_Inputs_DisplayStatus173:
 	MOVLW      Inputs_lcd_line_buf+0
 	MOVWF      FARG_Inputs_buf_put_const_str_buf+0
 	MOVF       Inputs_DisplayStatus_pos_L0+0, 0
@@ -1676,7 +1676,7 @@ L_Inputs_DisplayStatus174:
 	CALL       Inputs_buf_put_const_str+0
 	MOVF       R0+0, 0
 	MOVWF      Inputs_DisplayStatus_pos_L0+0
-L_Inputs_DisplayStatus175:
+L_Inputs_DisplayStatus174:
 	MOVLW      Inputs_lcd_line_buf+0
 	MOVWF      FARG_Inputs_buf_pad_line_buf+0
 	MOVF       Inputs_DisplayStatus_pos_L0+0, 0
@@ -1691,75 +1691,75 @@ L_end_Inputs_DisplayStatus:
 
 _Inputs_Buzzer:
 
-	GOTO       L_Inputs_Buzzer176
+	GOTO       L_Inputs_Buzzer175
+L_Inputs_Buzzer177:
 L_Inputs_Buzzer178:
-L_Inputs_Buzzer179:
 	MOVF       Inputs_bz_active_event+0, 0
 	XORLW      2
 	BTFSC      STATUS+0, 2
-	GOTO       L__Inputs_Buzzer202
+	GOTO       L__Inputs_Buzzer201
 	MOVF       Inputs_bz_active_event+0, 0
 	XORLW      3
 	BTFSC      STATUS+0, 2
-	GOTO       L__Inputs_Buzzer202
-	GOTO       L_Inputs_Buzzer182
-L__Inputs_Buzzer202:
+	GOTO       L__Inputs_Buzzer201
+	GOTO       L_Inputs_Buzzer181
+L__Inputs_Buzzer201:
 	GOTO       L_end_Inputs_Buzzer
-L_Inputs_Buzzer182:
+L_Inputs_Buzzer181:
 	MOVF       FARG_Inputs_Buzzer_event_code+0, 0
 	MOVWF      Inputs_bz_active_event+0
 	CLRF       Inputs_bz_tick_cnt+0
-	GOTO       L_Inputs_Buzzer177
-L_Inputs_Buzzer183:
+	GOTO       L_Inputs_Buzzer176
+L_Inputs_Buzzer182:
 	MOVF       Inputs_bz_active_event+0, 0
 	XORLW      3
 	BTFSS      STATUS+0, 2
-	GOTO       L_Inputs_Buzzer184
+	GOTO       L_Inputs_Buzzer183
 	GOTO       L_end_Inputs_Buzzer
-L_Inputs_Buzzer184:
+L_Inputs_Buzzer183:
 	MOVF       Inputs_bz_active_event+0, 0
 	XORLW      2
 	BTFSC      STATUS+0, 2
-	GOTO       L_Inputs_Buzzer185
+	GOTO       L_Inputs_Buzzer184
 	MOVLW      2
 	MOVWF      Inputs_bz_active_event+0
 	CLRF       Inputs_bz_tick_cnt+0
+L_Inputs_Buzzer184:
+	GOTO       L_Inputs_Buzzer176
 L_Inputs_Buzzer185:
-	GOTO       L_Inputs_Buzzer177
-L_Inputs_Buzzer186:
 	MOVF       Inputs_bz_active_event+0, 0
 	XORLW      3
 	BTFSC      STATUS+0, 2
-	GOTO       L_Inputs_Buzzer187
+	GOTO       L_Inputs_Buzzer186
 	MOVLW      3
 	MOVWF      Inputs_bz_active_event+0
 	CLRF       Inputs_bz_tick_cnt+0
+L_Inputs_Buzzer186:
+	GOTO       L_Inputs_Buzzer176
 L_Inputs_Buzzer187:
-	GOTO       L_Inputs_Buzzer177
-L_Inputs_Buzzer188:
 	CLRF       Inputs_bz_active_event+0
 	CLRF       Inputs_bz_tick_cnt+0
 	BCF        PORTC+0, 7
-	GOTO       L_Inputs_Buzzer177
-L_Inputs_Buzzer176:
+	GOTO       L_Inputs_Buzzer176
+L_Inputs_Buzzer175:
 	MOVF       FARG_Inputs_Buzzer_event_code+0, 0
 	XORLW      1
 	BTFSC      STATUS+0, 2
-	GOTO       L_Inputs_Buzzer178
+	GOTO       L_Inputs_Buzzer177
 	MOVF       FARG_Inputs_Buzzer_event_code+0, 0
 	XORLW      4
 	BTFSC      STATUS+0, 2
-	GOTO       L_Inputs_Buzzer179
+	GOTO       L_Inputs_Buzzer178
 	MOVF       FARG_Inputs_Buzzer_event_code+0, 0
 	XORLW      2
 	BTFSC      STATUS+0, 2
-	GOTO       L_Inputs_Buzzer183
+	GOTO       L_Inputs_Buzzer182
 	MOVF       FARG_Inputs_Buzzer_event_code+0, 0
 	XORLW      3
 	BTFSC      STATUS+0, 2
-	GOTO       L_Inputs_Buzzer186
-	GOTO       L_Inputs_Buzzer188
-L_Inputs_Buzzer177:
+	GOTO       L_Inputs_Buzzer185
+	GOTO       L_Inputs_Buzzer187
+L_Inputs_Buzzer176:
 L_end_Inputs_Buzzer:
 	RETURN
 ; end of _Inputs_Buzzer

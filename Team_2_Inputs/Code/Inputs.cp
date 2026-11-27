@@ -1,7 +1,7 @@
-#line 1 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
-#line 1 "c:/users/ahmed/desktop/college/project embeded/mini_elevator_compile/team_2_inputs/code/../inputs.h"
-#line 1 "c:/users/ahmed/desktop/college/project embeded/mini_elevator_compile/team_2_inputs/code/../../shared/system_types.h"
-#line 30 "c:/users/ahmed/desktop/college/project embeded/mini_elevator_compile/team_2_inputs/code/../inputs.h"
+#line 1 "D:/Programming Projects/embedded_project/Mini-elevator/Team_2_Inputs/Code/Inputs.c"
+#line 1 "d:/programming projects/embedded_project/mini-elevator/team_2_inputs/code/../inputs.h"
+#line 1 "d:/programming projects/embedded_project/mini-elevator/team_2_inputs/code/../../shared/system_types.h"
+#line 30 "d:/programming projects/embedded_project/mini-elevator/team_2_inputs/code/../inputs.h"
 void Inputs_Init(void);
 
 
@@ -26,9 +26,9 @@ void Inputs_DisplayStatus(
 
 
 void Inputs_Buzzer(unsigned char event_code);
-#line 1 "c:/users/ahmed/desktop/college/project embeded/mini_elevator_compile/team_2_inputs/code/../keypad_config.h"
-#line 1 "c:/users/ahmed/desktop/college/project embeded/mini_elevator_compile/team_2_inputs/code/../../shared/system_types.h"
-#line 49 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
+#line 1 "d:/programming projects/embedded_project/mini-elevator/team_2_inputs/code/../keypad_config.h"
+#line 1 "d:/programming projects/embedded_project/mini-elevator/team_2_inputs/code/../../shared/system_types.h"
+#line 51 "D:/Programming Projects/embedded_project/Mini-elevator/Team_2_Inputs/Code/Inputs.c"
 static unsigned char kp_last_key;
 static unsigned char kp_stable_cnt;
 static unsigned char btn_last_mask;
@@ -51,7 +51,7 @@ static unsigned char bz_tick_cnt;
 
 static char lcd_cache[2][17];
 static char lcd_line_buf[17];
-#line 76 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
+#line 78 "D:/Programming Projects/embedded_project/Mini-elevator/Team_2_Inputs/Code/Inputs.c"
 static void lcd_write_nibble(unsigned char nibble) {
 
  PORTD = (unsigned char)((PORTD & 0x07) | ((nibble & 0x0F) << 4));
@@ -113,7 +113,7 @@ static void lcd_write_line(unsigned char row, char *ram_text) {
  lcd_send_byte((unsigned char)ram_text[i], 1);
  }
 }
-#line 142 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
+#line 144 "D:/Programming Projects/embedded_project/Mini-elevator/Team_2_Inputs/Code/Inputs.c"
 static unsigned char buf_put_const_str(char *buf, unsigned char pos, const char *s) {
  while (*s != 0 && pos < 16) {
  buf[pos++] = *s++;
@@ -209,44 +209,43 @@ static void lcd_flush_if_changed(unsigned char row) {
  lcd_write_line(row, lcd_line_buf);
  }
 }
-#line 242 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
+#line 244 "D:/Programming Projects/embedded_project/Mini-elevator/Team_2_Inputs/Code/Inputs.c"
 static void keypad_rows_idle(void) {
-  PORTB.F3  = 1;
-  PORTE.F0  = 1;
-  PORTE.F1  = 1;
-  PORTE.F2  = 1;
+#line 248 "D:/Programming Projects/embedded_project/Mini-elevator/Team_2_Inputs/Code/Inputs.c"
+ PORTB = 0xFF;
 }
-#line 257 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
+#line 260 "D:/Programming Projects/embedded_project/Mini-elevator/Team_2_Inputs/Code/Inputs.c"
 static unsigned char keypad_scan_raw(void) {
  unsigned char row;
  unsigned char key = 0;
 
  for (row = 0; row < 4 && key == 0; row++) {
- keypad_rows_idle();
-
  if (row == 0) {
-  PORTB.F3  = 0;
+ PORTB = 0xEF;
  }
  else if (row == 1) {
-  PORTE.F0  = 0;
+ PORTB = 0xDF;
  }
  else if (row == 2) {
-  PORTE.F1  = 0;
+ PORTB = 0xBF;
  }
  else {
-  PORTE.F2  = 0;
+ PORTB = 0x7F;
  }
 
  Delay_us(20);
 
  if ( PORTB.F0  == 0) {
- key = (unsigned char)(row * 3 + 1);
+ key = (unsigned char)(row * 4 + 1);
  }
  else if ( PORTB.F1  == 0) {
- key = (unsigned char)(row * 3 + 2);
+ key = (unsigned char)(row * 4 + 2);
  }
  else if ( PORTB.F2  == 0) {
- key = (unsigned char)(row * 3 + 3);
+ key = (unsigned char)(row * 4 + 3);
+ }
+ else if ( PORTB.F3  == 0) {
+ key = (unsigned char)(row * 4 + 4);
  }
  }
 
@@ -258,10 +257,10 @@ static unsigned char keypad_scan_raw(void) {
 static unsigned char landing_buttons_read_raw_mask(void) {
  unsigned char mask = 0;
 
- if ( PORTA.F2  == 0) mask |= 0x01;
- if ( PORTA.F3  == 0) mask |= 0x02;
- if ( PORTA.F4  == 0) mask |= 0x04;
- if ( PORTA.F5  == 0) mask |= 0x08;
+ if ( PORTA.F2  ==  1 ) mask |= 0x01;
+ if ( PORTA.F3  ==  1 ) mask |= 0x02;
+ if ( PORTA.F4  ==  1 ) mask |= 0x04;
+ if ( PORTA.F5  ==  1 ) mask |= 0x08;
 
  return mask;
 }
@@ -281,40 +280,38 @@ static void request_queue_push(unsigned char floor) {
  }
  req_count++;
 }
-#line 324 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
+
+
 static void handle_debounced_keypad(unsigned char key) {
  switch (key) {
- case 11:
+ case 14:
  request_queue_push( 0 );
  break;
- case 1:
- case 4:
+ case 9:
  request_queue_push( 1 );
  break;
- case 2:
- case 5:
+ case 10:
  request_queue_push( 2 );
  break;
- case 3:
- case 6:
+ case 11:
  request_queue_push( 3 );
  break;
  default:
  break;
  }
 }
-#line 350 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
+#line 350 "D:/Programming Projects/embedded_project/Mini-elevator/Team_2_Inputs/Code/Inputs.c"
 static unsigned char hall_read_raw_mask(void) {
  unsigned char mask = 0;
 
- if ( PORTC.F3  == 0) mask |= 0x01;
- if ( PORTC.F4  == 0) mask |= 0x02;
- if ( PORTC.F5  == 0) mask |= 0x04;
- if ( PORTC.F6  == 0) mask |= 0x08;
+ if ( PORTC.F3  ==  1 ) mask |= 0x01;
+ if ( PORTC.F4  ==  1 ) mask |= 0x02;
+ if ( PORTC.F5  ==  1 ) mask |= 0x04;
+ if ( PORTC.F6  ==  1 ) mask |= 0x08;
 
  return mask;
 }
-#line 365 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
+#line 365 "D:/Programming Projects/embedded_project/Mini-elevator/Team_2_Inputs/Code/Inputs.c"
 static void buzzer_service_tick(void) {
  unsigned char output_on = 0;
  unsigned char period = 0;
@@ -369,7 +366,7 @@ static void buzzer_service_tick(void) {
 
   PORTC.F7  = output_on;
 }
-#line 424 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_2_Inputs/Code/Inputs.c"
+#line 424 "D:/Programming Projects/embedded_project/Mini-elevator/Team_2_Inputs/Code/Inputs.c"
 void Inputs_Init(void) {
  unsigned char pos;
 
@@ -380,13 +377,14 @@ void Inputs_Init(void) {
  OPTION_REG.F7 = 0;
 
 
-  TRISB.F3  = 0;
-  TRISE.F0  = 0;
-  TRISE.F1  = 0;
-  TRISE.F2  = 0;
+  TRISB.F4  = 0;
+  TRISB.F5  = 0;
+  TRISB.F6  = 0;
+  TRISB.F7  = 0;
   TRISB.F0  = 1;
   TRISB.F1  = 1;
   TRISB.F2  = 1;
+  TRISB.F3  = 1;
  keypad_rows_idle();
 
 

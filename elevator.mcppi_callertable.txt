@@ -52,7 +52,6 @@ main
 	Inputs_Update
 		keypad_scan_raw
 			keypad_rows_idle
-			Mul_8X8_U
 		handle_debounced_keypad
 			request_queue_push
 		landing_buttons_read_raw_mask

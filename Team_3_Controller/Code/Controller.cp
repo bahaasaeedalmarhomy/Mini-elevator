@@ -1,8 +1,8 @@
-#line 1 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
-#line 1 "c:/users/ahmed/desktop/college/project embeded/mini_elevator_compile/team_3_controller/code/../../shared/system_types.h"
-#line 1 "c:/users/ahmed/desktop/college/project embeded/mini_elevator_compile/team_3_controller/code/../../team_1_motor/motor.h"
-#line 1 "c:/users/ahmed/desktop/college/project embeded/mini_elevator_compile/team_3_controller/code/../../team_1_motor/../shared/system_types.h"
-#line 28 "c:/users/ahmed/desktop/college/project embeded/mini_elevator_compile/team_3_controller/code/../../team_1_motor/motor.h"
+#line 1 "D:/Programming Projects/embedded_project/Mini-elevator/Team_3_Controller/Code/Controller.c"
+#line 1 "d:/programming projects/embedded_project/mini-elevator/team_3_controller/code/../../shared/system_types.h"
+#line 1 "d:/programming projects/embedded_project/mini-elevator/team_3_controller/code/../../team_1_motor/motor.h"
+#line 1 "d:/programming projects/embedded_project/mini-elevator/team_3_controller/code/../../team_1_motor/../shared/system_types.h"
+#line 28 "d:/programming projects/embedded_project/mini-elevator/team_3_controller/code/../../team_1_motor/motor.h"
 void Motor_Init(void);
 
 
@@ -25,9 +25,9 @@ unsigned long Weight_GetGrams(void);
 
 
 unsigned char Weight_IsOverload(void);
-#line 1 "c:/users/ahmed/desktop/college/project embeded/mini_elevator_compile/team_3_controller/code/../../team_2_inputs/inputs.h"
-#line 1 "c:/users/ahmed/desktop/college/project embeded/mini_elevator_compile/team_3_controller/code/../../team_2_inputs/../shared/system_types.h"
-#line 30 "c:/users/ahmed/desktop/college/project embeded/mini_elevator_compile/team_3_controller/code/../../team_2_inputs/inputs.h"
+#line 1 "d:/programming projects/embedded_project/mini-elevator/team_3_controller/code/../../team_2_inputs/inputs.h"
+#line 1 "d:/programming projects/embedded_project/mini-elevator/team_3_controller/code/../../team_2_inputs/../shared/system_types.h"
+#line 30 "d:/programming projects/embedded_project/mini-elevator/team_3_controller/code/../../team_2_inputs/inputs.h"
 void Inputs_Init(void);
 
 
@@ -52,9 +52,9 @@ void Inputs_DisplayStatus(
 
 
 void Inputs_Buzzer(unsigned char event_code);
-#line 1 "c:/users/ahmed/desktop/college/project embeded/mini_elevator_compile/team_3_controller/code/../controller.h"
-#line 1 "c:/users/ahmed/desktop/college/project embeded/mini_elevator_compile/team_3_controller/code/../../shared/system_types.h"
-#line 21 "c:/users/ahmed/desktop/college/project embeded/mini_elevator_compile/team_3_controller/code/../controller.h"
+#line 1 "d:/programming projects/embedded_project/mini-elevator/team_3_controller/code/../controller.h"
+#line 1 "d:/programming projects/embedded_project/mini-elevator/team_3_controller/code/../../shared/system_types.h"
+#line 21 "d:/programming projects/embedded_project/mini-elevator/team_3_controller/code/../controller.h"
 void Controller_Init(void);
 
 
@@ -68,9 +68,9 @@ unsigned char Controller_GetCurrentFloor(void);
 
 
 unsigned char Controller_GetTargetFloor(void);
-#line 1 "c:/users/ahmed/desktop/college/project embeded/mini_elevator_compile/team_3_controller/code/../requesthandler.h"
-#line 1 "c:/users/ahmed/desktop/college/project embeded/mini_elevator_compile/team_3_controller/code/../../shared/system_types.h"
-#line 21 "c:/users/ahmed/desktop/college/project embeded/mini_elevator_compile/team_3_controller/code/../requesthandler.h"
+#line 1 "d:/programming projects/embedded_project/mini-elevator/team_3_controller/code/../requesthandler.h"
+#line 1 "d:/programming projects/embedded_project/mini-elevator/team_3_controller/code/../../shared/system_types.h"
+#line 21 "d:/programming projects/embedded_project/mini-elevator/team_3_controller/code/../requesthandler.h"
 void RequestHandler_Init(void);
 
 
@@ -96,7 +96,7 @@ void RequestHandler_Clear(void);
 
 
 unsigned char RequestHandler_GetCount(void);
-#line 28 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 28 "D:/Programming Projects/embedded_project/Mini-elevator/Team_3_Controller/Code/Controller.c"
 static unsigned char controller_state =  0 ;
 static unsigned char current_floor =  255 ;
 static unsigned char last_known_floor =  255 ;
@@ -108,12 +108,12 @@ static signed char last_direction =  0 ;
 static unsigned int state_ticks = 0;
 static unsigned int startup_ticks = 0;
 static unsigned int travel_ticks = 0;
-#line 43 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 43 "D:/Programming Projects/embedded_project/Mini-elevator/Team_3_Controller/Code/Controller.c"
 static void Controller_EnterState(unsigned char new_state) {
  controller_state = new_state;
  state_ticks = 0;
 }
-#line 51 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 51 "D:/Programming Projects/embedded_project/Mini-elevator/Team_3_Controller/Code/Controller.c"
 static void Controller_ReadRequests(void) {
  unsigned char requested_floor =  255 ;
 
@@ -123,14 +123,14 @@ static void Controller_ReadRequests(void) {
  }
  }
 }
-#line 64 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 64 "D:/Programming Projects/embedded_project/Mini-elevator/Team_3_Controller/Code/Controller.c"
 static void Controller_UpdateCurrentFloor(void) {
  current_floor = Inputs_GetCurrentFloor();
  if ( ((current_floor) <= 3 ) ) {
  last_known_floor = current_floor;
  }
 }
-#line 76 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 76 "D:/Programming Projects/embedded_project/Mini-elevator/Team_3_Controller/Code/Controller.c"
 void Controller_Init(void) {
  controller_state =  0 ;
  current_floor =  255 ;
@@ -152,7 +152,7 @@ void Controller_Init(void) {
 
  Inputs_Buzzer( 4 );
 }
-#line 102 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 102 "D:/Programming Projects/embedded_project/Mini-elevator/Team_3_Controller/Code/Controller.c"
 void Controller_Update(void) {
  unsigned char optimal;
  unsigned char ref_floor;
@@ -193,7 +193,7 @@ void Controller_Update(void) {
 
 
  switch (controller_state) {
-#line 147 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 147 "D:/Programming Projects/embedded_project/Mini-elevator/Team_3_Controller/Code/Controller.c"
  case  0 :
  Motor_Stop();
  Brake_Engage();
@@ -212,7 +212,7 @@ void Controller_Update(void) {
  Controller_EnterState( 8 );
  }
  break;
-#line 170 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 170 "D:/Programming Projects/embedded_project/Mini-elevator/Team_3_Controller/Code/Controller.c"
  case  1 :
  Motor_Stop();
  Brake_Engage();
@@ -275,7 +275,7 @@ void Controller_Update(void) {
  last_direction =  0 ;
  }
  break;
-#line 237 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 237 "D:/Programming Projects/embedded_project/Mini-elevator/Team_3_Controller/Code/Controller.c"
  case  2 :
 
  if (current_floor !=  255  && direction !=  0 ) {
@@ -313,7 +313,7 @@ void Controller_Update(void) {
  }
  }
  break;
-#line 279 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 279 "D:/Programming Projects/embedded_project/Mini-elevator/Team_3_Controller/Code/Controller.c"
  case  3 :
  Motor_Set( 1 ,  65 );
 
@@ -346,7 +346,7 @@ void Controller_Update(void) {
  Controller_EnterState( 5 );
  }
  break;
-#line 316 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 316 "D:/Programming Projects/embedded_project/Mini-elevator/Team_3_Controller/Code/Controller.c"
  case  4 :
  Motor_Set( -1 ,  65 );
 
@@ -379,7 +379,7 @@ void Controller_Update(void) {
  Controller_EnterState( 5 );
  }
  break;
-#line 353 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 353 "D:/Programming Projects/embedded_project/Mini-elevator/Team_3_Controller/Code/Controller.c"
  case  5 :
  Motor_Stop();
 
@@ -388,7 +388,7 @@ void Controller_Update(void) {
  Controller_EnterState( 6 );
  }
  break;
-#line 366 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 366 "D:/Programming Projects/embedded_project/Mini-elevator/Team_3_Controller/Code/Controller.c"
  case  6 :
  Motor_Stop();
 
@@ -406,7 +406,7 @@ void Controller_Update(void) {
  }
  }
  break;
-#line 388 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 388 "D:/Programming Projects/embedded_project/Mini-elevator/Team_3_Controller/Code/Controller.c"
  case  7 :
  Motor_Stop();
  Brake_Engage();
@@ -416,7 +416,7 @@ void Controller_Update(void) {
  Controller_EnterState( 1 );
  }
  break;
-#line 402 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 402 "D:/Programming Projects/embedded_project/Mini-elevator/Team_3_Controller/Code/Controller.c"
  case  8 :
  Motor_Stop();
  Brake_Engage();
@@ -447,15 +447,15 @@ void Controller_Update(void) {
  controller_state,
  Weight_GetGrams());
 }
-#line 436 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 436 "D:/Programming Projects/embedded_project/Mini-elevator/Team_3_Controller/Code/Controller.c"
 unsigned char Controller_GetState(void) {
  return controller_state;
 }
-#line 443 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 443 "D:/Programming Projects/embedded_project/Mini-elevator/Team_3_Controller/Code/Controller.c"
 unsigned char Controller_GetCurrentFloor(void) {
  return current_floor;
 }
-#line 450 "C:/Users/Ahmed/Desktop/college/project embeded/Mini_Elevator_Compile/Team_3_Controller/Code/Controller.c"
+#line 450 "D:/Programming Projects/embedded_project/Mini-elevator/Team_3_Controller/Code/Controller.c"
 unsigned char Controller_GetTargetFloor(void) {
  return target_floor;
 }
